@@ -1,0 +1,16 @@
+{
+  "name": "cyrene-name-roller-plugin-template",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "cnrp validate .",
+    "build": "cnrp pack . --out dist/cyrene-plugin-template.cnrp"
+  },
+  "devDependencies": {
+    "@cyrene2008/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.0.1.tgz"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

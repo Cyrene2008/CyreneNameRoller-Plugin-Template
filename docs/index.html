@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>CyreneNameRoller 插件开发中心</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <aside class="nav">
+    <a class="brand" href="#overview"><span class="brand-icon">C</span><span>Plugin Studio<small>CyreneNameRoller</small></span></a>
+    <nav>
+      <a href="#overview">概览</a>
+      <a href="#native">原生页面控件</a>
+      <a href="#gallery">Fluent 组件画廊</a>
+      <a href="#events">事件</a>
+      <a href="#rpc">RPC 与权限</a>
+      <a href="#platform">跨平台能力</a>
+      <a href="#catalog">发布与目录</a>
+    </nav>
+    <button id="themeButton" class="button subtle">切换深浅主题</button>
+  </aside>
+
+  <main>
+    <section id="overview" class="hero">
+      <div><span class="eyebrow">API 1.0.0</span><h1>做一个真正融入宿主的插件</h1><p>使用声明式 Fluent 页面、Worker 事件和权限化 RPC，在 Web 与 Tauri 上共享业务逻辑。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
+      <div class="hero-card"><div class="code-title"><span></span><span></span><span></span>manifest.json</div><pre><code>"native": {
+  "type": "settings",
+  "settingsKey": "settings",
+  "controls": [
+    { "type": "toggle", "path": "enabled" },
+    { "type": "range", "path": "volume" },
+    { "type": "select", "path": "mode" },
+    { "type": "audio", "path": "sound" }
+  ]
+}</code></pre></div>
+    </section>
+
+    <section id="native">
+      <header><span class="eyebrow">Host-rendered</span><h2>原生插件页面控件</h2><p>这些控件可以写进 manifest，由 CyreneNameRoller 使用真实宿主 Fluent 组件渲染并自动跟随主题。</p></header>
+      <div class="settings-card">
+        <div class="settings-head"><div class="app-icon">✦</div><div><h3>示例插件设置</h3><p>下面四种控件均可直接声明。</p></div></div>
+        <div class="setting-row"><div><strong>Toggle</strong><span>布尔值开关</span></div><label class="toggle"><input id="demoToggle" type="checkbox" checked><i></i></label></div>
+        <div class="setting-row"><div><strong>Range</strong><span>数值范围与步进</span></div><div class="range"><input id="demoRange" type="range" min="0" max="100" value="70"><output id="rangeValue">70%</output></div></div>
+        <div class="setting-row"><div><strong>Select</strong><span>有限枚举选项</span></div><select><option>每次操作一次</option><option>每个结果一次</option></select></div>
+        <div class="setting-row"><div><strong>Audio</strong><span>由用户选择本地音频</span></div><div class="inline"><button class="button secondary">选择音频</button><button class="button subtle">试听</button></div></div>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <header><span class="eyebrow">Visual reference</span><h2>Fluent 组件画廊</h2><p>这是宿主视觉与交互参考。第三方插件不直接导入宿主 Vue 组件；可声明的插件控件以上一节为准。</p></header>
+      <div class="grid">
+        <article class="card"><h3>Button</h3><div class="wrap"><button class="button primary">Primary</button><button class="button secondary">Secondary</button><button class="button subtle">Subtle</button><button class="button danger">Danger</button></div></article>
+        <article class="card"><h3>Input</h3><input class="input" placeholder="Fluent input"><textarea class="input" rows="3" placeholder="Multiline input"></textarea></article>
+        <article class="card"><h3>Tabs</h3><div class="tabs" id="demoTabs"><button class="active">概览</button><button>设置</button><button>权限</button></div><p id="tabResult" class="muted">当前：概览</p></article>
+        <article class="card"><h3>Card</h3><div class="inner-card"><strong>Layered surface</strong><span>边框、圆角、阴影与主题色自动协调。</span></div></article>
+        <article class="card"><h3>Toast</h3><button id="toastButton" class="button secondary">显示通知</button></article>
+        <article class="card"><h3>Modal</h3><button id="modalButton" class="button secondary">打开对话框</button></article>
+        <article class="card"><h3>Toggle / Select</h3><div class="inline"><label class="toggle"><input type="checkbox"><i></i></label><select><option>桃粉</option><option>Fluent</option><option>自定义</option></select></div></article>
+        <article class="card"><h3>Icon</h3><div class="icons"><span>✓</span><span>⚙</span><span>↗</span><span>♫</span><span>⌁</span></div><p class="muted">宿主使用 Fluent UI Icons。</p></article>
+      </div>
+    </section>
+
+    <section id="events"><header><span class="eyebrow">Worker events</span><h2>可订阅事件</h2><p>需要 `events:draw` 权限。逐项事件适合每个结果执行，汇总事件适合每次操作执行一次。</p></header><div id="eventsTable" class="table"></div></section>
+    <section id="rpc"><header><span class="eyebrow">Permissioned bridge</span><h2>全部 RPC 与权限</h2><p>核心名单、历史记录、统计和平衡信息只读；`storage.write` 只写插件自己的命名空间。</p></header><div id="rpcTable" class="table"></div></section>
+    <section id="platform"><header><span class="eyebrow">Web + Tauri</span><h2>平台能力</h2><p>先读取 `runtime.capabilities`。不可用的可选能力返回结构化结果，插件应提供 Web fallback 或安全跳过。</p></header><div id="platformTable" class="table"></div></section>
+
+    <section id="catalog"><header><span class="eyebrow">Release automation</span><h2>发布与插件目录</h2><p>目录不固定版本和下载 URL。宿主从 GitHub 最新正式 Release 自动解析 `.cnrp` 资源和 SHA-256。</p></header><div class="two-column"><pre><code>{
+  "repository": "owner/repository",
+  "release": {
+    "provider": "github",
+    "channel": "latest",
+    "assetPattern": "my-plugin-*.cnrp"
+  },
+  "publisherKey": "base64-spki"
+}</code></pre><div class="checklist"><h3>发布检查</h3><label>✓ Tag 使用 v1.2.3</label><label>✓ Release 非 draft / prerelease</label><label>✓ 仅一个资源匹配 assetPattern</label><label>✓ 包内版本与 tag 一致</label><label>✓ 发布者私钥不进入仓库</label></div></div></section>
+
+    <footer>CyreneNameRoller Plugin API 1.0.0 · 2026</footer>
+  </main>
+
+  <div id="toast" class="toast" role="status"><strong>Fluent 通知</strong><span>这是一条页面内通知。</span></div>
+  <div id="modal" class="modal-backdrop" hidden><div class="modal"><h3>Fluent Modal</h3><p>用于需要用户明确确认的操作，而不是浏览器原生弹窗。</p><div class="actions"><button id="modalCancel" class="button subtle">取消</button><button id="modalConfirm" class="button primary">确认</button></div></div></div>
+  <script src="app.js"></script>
+</body>
+</html>
+

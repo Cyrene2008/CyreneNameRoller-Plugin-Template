@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "cn.example.cyrene.plugin",
+  "name": "Cyrene Plugin Template",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "description": "A first-party-style CyreneNameRoller plugin template.",
+  "engine": { "min": "1.0.0", "max": "1.0.0" },
+  "entry": "src/worker.js",
+  "icon": "assets/icon.svg",
+  "readme": "README.md",
+  "permissions": [
+    "storage:read",
+    "storage:write",
+    "events:draw",
+    "notifications:show",
+    "audio:select",
+    "audio:play"
+  ],
+  "contributes": {
+    "pages": [
+      {
+        "id": "settings",
+        "title": "Template Plugin",
+        "icon": "apps-24-regular",
+        "location": "plugins",
+        "description": "Native Fluent settings rendered by CyreneNameRoller.",
+        "native": {
+          "type": "settings",
+          "settingsKey": "settings",
+          "controls": [
+            { "id": "enabled", "type": "toggle", "path": "enabled", "label": "启用插件", "description": "保留配置但暂停插件行为。", "default": true },
+            { "id": "volume", "type": "range", "path": "volume", "label": "音量", "description": "范围控件示例。", "min": 0, "max": 1, "step": 0.01, "default": 0.7 },
+            { "id": "mode", "type": "select", "path": "mode", "label": "工作模式", "description": "下拉选择控件示例。", "default": "summary", "options": [{ "value": "summary", "label": "每次抽取一次" }, { "value": "each", "label": "每个结果一次" }] },
+            { "id": "sound", "type": "audio", "path": "sound", "label": "结果音效", "description": "支持常见本地音频格式。", "accept": "audio/*,.mp3,.m4a,.wav,.flac,.ogg", "default": null }
+          ]
+        }
+      }
+    ]
+  }
+}
+
