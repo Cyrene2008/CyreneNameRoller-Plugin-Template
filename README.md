@@ -47,4 +47,4 @@ npm run build
 
 插件可写入自己的 `storage` 命名空间。名单、抽取历史、统计数据和平衡参数仅提供只读快照，不存在对应写入 RPC。
 
-完整参考请访问本仓库的 GitHub Pages。
+完整参考请访问 [GitHub Pages：Fluent 组件画廊与 API 文档](https://cyrene2008.github.io/CyreneNameRoller-Plugin-Template/)。
