@@ -1,6 +1,6 @@
 # CyreneNameRoller Plugin Template
 
-CyreneNameRoller Plugin API 1.1 官方模板。点击 GitHub 的 **Use this template** 创建仓库，即可开发同时适配 Web 与 Tauri 的 `.cnrp` 插件。
+CyreneNameRoller Plugin API 1.2 官方模板。点击 GitHub 的 **Use this template** 创建仓库，即可开发同时适配 Web 与 Tauri 的 `.cnrp` 插件。
 
 本模板不只是一个“设置页插件”：
 
@@ -9,6 +9,7 @@ CyreneNameRoller Plugin API 1.1 官方模板。点击 GitHub 的 **Use this temp
 - `src/worker.js` 展示插件生命周期、只读事件、插件私有存储、音频和页面内通知。
 - `animations/template-motion.json` 覆盖页面切换、点名、发牌、翻牌、抽奖与全局动画目标。
 - `src/visual.js` 展示独立 OffscreenCanvas Worker、主题/尺寸生命周期和结果粒子反馈。
+- `contributes.commands` 与 `onCommand()` 展示插件自有命令如何由宿主安全调用。
 - GitHub Actions 自动校验、打包 Release 和部署 Pages API/Fluent 图鉴。
 
 ## 使用模板
@@ -26,7 +27,7 @@ npm run build
 
 生成的插件位于 `dist/cyrene-plugin-template.cnrp`。本地调试时可在 CyreneNameRoller 的插件页面导入 `.cnrp`。
 
-## API 1.1 示例地图
+## API 1.2 示例地图
 
 | 目标 | 示例文件 | 关键能力 |
 | --- | --- | --- |
@@ -37,6 +38,7 @@ npm run build
 | 前置插件共享数据 | SDK `readDependencyStorage()` | 依赖声明 `dataAccess` 与目标插件 `shareData` |
 | 动画扩展 | `animations/template-motion.json` | 受校验的 WAAPI 关键帧 |
 | Canvas/WebGL 表现层 | `src/visual.js` | `defineVisualSurface()`、OffscreenCanvas |
+| 插件自有命令 | `manifest.json` / `src/worker.js` | `contributes.commands`、`onCommand()` |
 
 HTML 页面适合大型交互，但它运行在受控页面环境中，不能直接访问宿主 DOM。普通设置优先使用宿主原生 schema，能够自动继承桃粉、Fluent、自定义主题以及深浅模式。
 
@@ -58,7 +60,7 @@ Canvas/WebGL 插件必须同时尊重 `perfAnimations === false` 和 `reducedMot
 
 ## SDK 版本
 
-模板在 `vendor/` 中携带官方 `@cyrene2008/cyrene-name-roller@1.1.0` SDK `.tgz`，因此克隆后无需 registry Token 即可安装。升级 SDK 时，用新版官方包替换该文件，并同步更新 `package.json`、锁文件与 `manifest.json` 的 `engine`。
+模板在 `vendor/` 中携带官方 `@cyrene2008/cyrene-name-roller@1.2.0` SDK `.tgz`，因此克隆后无需 registry Token 即可安装。升级 SDK 时，用新版官方包替换该文件，并同步更新 `package.json`、锁文件与 `manifest.json` 的 `engine`。
 
 ## 发布插件
 
@@ -81,6 +83,8 @@ Canvas/WebGL 插件必须同时尊重 `perfAnimations === false` 和 `reducedMot
 
 插件的创作自由主要存在于页面、交互、动画、音频、Canvas/WebGL 表现和新玩法流程；核心抽取结果仍由宿主掌握。
 
+API 1.2 使用通用宿主扩展模型：先用 `describeHost()` 发现资源、事务和扩展点，再用 `queryResource()` 读取只读资源、用 `executeTransaction()` 提交宿主管理事务。插件可以自由组合这些能力，而不必等待宿主为每一种玩法增加专用 RPC；既有记录、统计、CAF 参数和抽取结果仍不可伪造或改写。
+
 - 插件可以读取名单、既有记录、统计和公开平衡状态的快照（需相应权限）。
 - 插件可以调用 `draw.execute` 提交名单、目标、性别、数量和是否允许重复等筛选条件。
 - 宿主使用 CAF/核心算法生成结果，并在同一事务中增加统计、追加带 `pluginId`/`operationId` 的记录。
@@ -93,4 +97,4 @@ Canvas/WebGL 插件必须同时尊重 `perfAnimations === false` 和 `reducedMot
 
 先读取 `context.platform` / `context.capabilities`，再决定使用宿主桥接还是 Web fallback。不可用的可选系统能力会返回结构化 `UNSUPPORTED_PLATFORM`，插件应安全跳过或显示平台专属 UI，不应直接调用 PowerShell、CMD、Tauri API 或宿主内部模块。
 
-完整参考请访问 [GitHub Pages：API 1.1、Fluent 组件画廊与扩展点文档](https://cyrene2008.github.io/CyreneNameRoller-Plugin-Template/)。
+完整参考请访问 [GitHub Pages：API 1.2、Fluent 组件画廊与扩展点文档](https://cyrene2008.github.io/CyreneNameRoller-Plugin-Template/)。

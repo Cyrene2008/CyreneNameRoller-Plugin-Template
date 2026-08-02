@@ -5,7 +5,7 @@
   "version": "1.1.0",
   "author": "Your Name",
   "description": "A first-party-style CyreneNameRoller plugin template.",
-  "engine": { "min": "1.1.0", "max": "1.1.0" },
+  "engine": { "min": "1.2.0", "max": "1.2.0" },
   "entry": "src/worker.js",
   "icon": "assets/icon.svg",
   "readme": "README.md",
@@ -70,6 +70,9 @@
         "events": ["app:theme-changed", "app:resize", "draw:result"],
         "defaultEnabled": true
       }
+    ],
+    "commands": [
+      { "id": "refresh", "title": "刷新插件", "titleEn": "Refresh plugin", "locations": ["command-palette", "page-header"], "icon": "arrow-clockwise-24-regular", "order": 300 }
     ]
   }
 }

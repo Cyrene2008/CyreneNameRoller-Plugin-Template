@@ -12,6 +12,8 @@ definePlugin({
   async activate(context) {
     request = context.request
     platform = context.platform
+    const host = await describeHost(context)
+    console.info(`Cyrene host API ${host.apiVersion}: ${host.resources.length} resources, ${host.transactions.length} transactions`)
   },
 
   async onEvent(event, payload) {

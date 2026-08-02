@@ -19,6 +19,7 @@
       <a href="#gallery">Fluent 组件画廊</a>
       <a href="#events">事件</a>
       <a href="#rpc">RPC 与权限</a>
+      <a href="#extensions">扩展内核</a>
       <a href="#platform">跨平台能力</a>
       <a href="#boundary">公平边界</a>
       <a href="#catalog">发布与目录</a>
@@ -28,7 +29,7 @@
 
   <main>
     <section id="overview" class="hero">
-      <div><span class="eyebrow">Plugin API 1.1.0</span><h1>做一个真正融入宿主的插件</h1><p>用宿主 Fluent 设置、Dock 一级页面、CAF 抽取事务、动画包与 Canvas/WebGL 视觉层，在 Web 和 Tauri 上构建页面级大型功能。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
+      <div><span class="eyebrow">Plugin API 1.2.0</span><h1>做一个真正融入宿主的插件</h1><p>用宿主 Fluent 设置、Dock 一级页面、通用扩展点、CAF 抽取事务、动画包与 Canvas/WebGL 视觉层，在 Web 和 Tauri 上构建页面级大型功能。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
       <div class="hero-card"><div class="code-title"><span></span><span></span><span></span>manifest.json</div><pre><code>"native": {
   "type": "settings",
   "settingsKey": "settings",
@@ -121,6 +122,7 @@
 
     <section id="events"><header><span class="eyebrow">Worker events</span><h2>可订阅事件</h2><p>抽取事件需要 <code>events:draw</code>，应用生命周期需要 <code>events:lifecycle</code>。逐项事件适合逐个反馈，汇总事件适合一次操作只执行一次。</p></header><div id="eventsTable" class="table"></div></section>
     <section id="rpc"><header><span class="eyebrow">Permissioned bridge</span><h2>全部 RPC 与权限</h2><p>核心名单、既有历史、统计和平衡信息只读；唯一核心追加入口是 <code>draw.execute</code>，<code>storage.write</code> 只写插件自己的命名空间。</p></header><div id="rpcTable" class="table"></div></section>
+    <section id="extensions"><header><span class="eyebrow">Composable kernel</span><h2>通用扩展内核</h2><p>插件不需要等待宿主为每种玩法发明一个专用接口：插件拥有自己的页面、命令、动画和视觉层；敏感状态变化通过宿主发现到的资源与事务完成。</p></header><div class="two-column"><div class="card"><h3>可自由构建</h3><p>Dock 页面、复杂业务页面、命令、语义主题、GSAP/WAAPI 动画、Canvas/WebGL 视觉层和插件私有存储。</p><pre><code>contributes.pages · contributes.commands · contributes.animationPacks · contributes.visualSurfaces · contributes.appearancePacks</code></pre></div><div class="card"><h3>由宿主托管</h3><p>插件可查询只读名单、记录、统计与 CAF 状态，也可提交宿主管理的抽取事务。插件不能指定赢家、改写历史、修改统计或削弱公平参数。</p><pre><code>describeHost(context) → queryResource(context, 'names') → executeTransaction(context, 'draw', input)</code></pre></div></div></section>
     <section id="platform"><header><span class="eyebrow">Web + Tauri</span><h2>平台能力</h2><p>先读取 `runtime.capabilities`。不可用的可选能力返回结构化结果，插件应提供 Web fallback 或安全跳过。</p></header><div id="platformTable" class="table"></div></section>
 
     <section id="boundary"><header><span class="eyebrow">Freedom with a hard floor</span><h2>创作自由与不可破坏的底线</h2><p>插件可构建大型页面、业务流程和表现层，但公平相关状态由宿主拥有。</p></header><div class="boundary-grid"><article><h3>允许</h3><ul><li>添加 Dock 页面和插件子页面</li><li>调用宿主 CAF 发起新抽取</li><li>追加宿主生成的统计与记录事务</li><li>读取名单、记录、统计、公开平衡快照</li><li>扩展动画、音频、Canvas/WebGL 和平台兼容流程</li></ul></article><article><h3>不允许</h3><ul><li>指定赢家、候选权重或伪造结果</li><li>改写/删除既有历史和统计</li><li>修改 CAF 参数或关闭公平约束</li><li>覆盖真实点名/抽奖结果</li><li>绕过声明权限直接访问宿主内部状态</li></ul></article></div></section>
@@ -135,7 +137,7 @@
   "publisherKey": "base64-spki"
 }</code></pre><div class="checklist"><h3>发布检查</h3><label>✓ Tag 使用 v1.2.3</label><label>✓ Release 非 draft / prerelease</label><label>✓ 仅一个资源匹配 assetPattern</label><label>✓ 包内版本与 tag 一致</label><label>✓ 发布者私钥不进入仓库</label></div></div></section>
 
-    <footer>CyreneNameRoller Plugin API 1.1.0 · 2026</footer>
+    <footer>CyreneNameRoller Plugin API 1.2.0 · 2026</footer>
   </main>
 
   <div id="toast" class="toast" role="status"><strong>Fluent 通知</strong><span>这是一条页面内通知。</span></div>
