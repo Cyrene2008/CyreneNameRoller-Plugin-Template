@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>抽取实验室</title>
+  <link rel="stylesheet" href="draw-studio.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="hero-panel">
+      <div class="hero-icon" aria-hidden="true">✦</div>
+      <div>
+        <span class="eyebrow">HOST-MEDIATED DRAW</span>
+        <h1>抽取实验室</h1>
+        <p>这是一个顶层 Dock 页面示例。插件负责玩法与呈现，宿主负责 CAF、统计和不可篡改的抽取记录。</p>
+      </div>
+    </header>
+
+    <section class="content-grid">
+      <form id="drawForm" class="fluent-card controls-card">
+        <div class="section-title"><div><h2>抽取条件</h2><p>只提交筛选条件，不提交候选权重或指定结果。</p></div><span class="status-pill">CAF</span></div>
+        <label class="field"><span>名单 ID</span><input id="listId" placeholder="留空使用当前名单"></label>
+        <div class="field-row">
+          <label class="field"><span>抽取目标</span><select id="target"><option value="people">人员</option><option value="groups">小组</option></select></label>
+          <label class="field"><span>性别筛选</span><select id="gender"><option value="all">全部</option><option value="male">仅男</option><option value="female">仅女</option></select></label>
+        </div>
+        <label class="field"><span>抽取数量</span><div class="counter"><button id="minus" type="button" aria-label="减少">−</button><input id="count" type="number" min="1" max="100" value="1"><button id="plus" type="button" aria-label="增加">＋</button></div></label>
+        <label class="switch-row"><span><strong>允许重复</strong><small>关闭时宿主会按可用候选数量自动限制结果。</small></span><input id="duplicates" type="checkbox" role="switch"></label>
+        <button id="drawButton" class="primary-button" type="submit"><span>开始宿主抽取</span><i>→</i></button>
+      </form>
+
+      <section class="fluent-card result-card" aria-live="polite">
+        <div class="section-title"><div><h2>宿主回执</h2><p id="resultHint">等待一次抽取操作。</p></div><span id="algorithm" class="status-pill muted">READY</span></div>
+        <div id="emptyState" class="empty-state"><div>◇</div><strong>结果由宿主生成</strong><span>插件无法指定赢家，也无法改写统计与历史。</span></div>
+        <div id="resultPanel" class="result-panel" hidden>
+          <div id="resultNames" class="result-names"></div>
+          <dl class="receipt-grid">
+            <div><dt>Operation ID</dt><dd id="operationId">—</dd></div>
+            <div><dt>Algorithm</dt><dd id="algorithmName">—</dd></div>
+            <div><dt>Committed</dt><dd id="committedAt">—</dd></div>
+            <div><dt>Plugin</dt><dd id="pluginId">—</dd></div>
+          </dl>
+        </div>
+      </section>
+    </section>
+
+    <section class="boundary-card">
+      <strong>公平边界</strong>
+      <span>允许：发起新抽取、追加宿主生成的记录。</span>
+      <span>禁止：指定结果、修改既有记录、统计、权重或 CAF 参数。</span>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="draw-studio.js"></script>
+</body>
+</html>

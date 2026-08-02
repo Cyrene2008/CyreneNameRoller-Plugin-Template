@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "cn.example.cyrene.plugin",
   "name": "Cyrene Plugin Template",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Your Name",
   "description": "A first-party-style CyreneNameRoller plugin template.",
-  "engine": { "min": "1.0.0", "max": "1.0.0" },
+  "engine": { "min": "1.1.0", "max": "1.1.0" },
   "entry": "src/worker.js",
   "icon": "assets/icon.svg",
   "readme": "README.md",
@@ -13,6 +13,10 @@
     "storage:read",
     "storage:write",
     "events:draw",
+    "events:lifecycle",
+    "draw:execute",
+    "ui:animations",
+    "ui:visual-surfaces",
     "notifications:show",
     "audio:select",
     "audio:play"
@@ -32,9 +36,39 @@
             { "id": "enabled", "type": "toggle", "path": "enabled", "label": "启用插件", "description": "保留配置但暂停插件行为。", "default": true },
             { "id": "volume", "type": "range", "path": "volume", "label": "音量", "description": "范围控件示例。", "min": 0, "max": 1, "step": 0.01, "default": 0.7 },
             { "id": "mode", "type": "select", "path": "mode", "label": "工作模式", "description": "下拉选择控件示例。", "default": "summary", "options": [{ "value": "summary", "label": "每次抽取一次" }, { "value": "each", "label": "每个结果一次" }] },
-            { "id": "sound", "type": "audio", "path": "sound", "label": "结果音效", "description": "支持常见本地音频格式。", "accept": "audio/*,.mp3,.m4a,.wav,.flac,.ogg", "default": null }
+            { "id": "sound", "type": "audio", "path": "sound", "label": "结果音效", "description": "支持常见本地音频格式。", "accept": "audio/*,.mp3,.m4a,.wav,.flac,.ogg", "default": null },
+            { "id": "roller-motion", "type": "animation-select", "target": "roller.finish", "packId": "template-motion", "label": "点名结果动画", "description": "由宿主渲染动画选择器，并安全应用本插件的动画预设。" },
+            { "id": "page-motion", "type": "animation-select", "target": "page.transition", "packId": "template-motion", "label": "页面切换动画", "description": "切换插件贡献的页面过渡效果。" }
           ]
         }
+      },
+      {
+        "id": "draw-studio",
+        "title": "抽取实验室",
+        "titleEn": "Draw Studio",
+        "icon": "wand-24-regular",
+        "location": "dock",
+        "order": 720,
+        "description": "使用宿主 CAF 和记录事务构建全新的点名玩法。",
+        "entry": "pages/draw-studio.html"
+      }
+    ],
+    "animationPacks": [
+      {
+        "id": "template-motion",
+        "title": "Template Motion",
+        "description": "页面、点名、翻牌、抽奖与全局效果示例。",
+        "source": "animations/template-motion.json"
+      }
+    ],
+    "visualSurfaces": [
+      {
+        "id": "ambient-particles",
+        "title": "Ambient Particles",
+        "entry": "src/visual.js",
+        "placement": "background",
+        "events": ["app:theme-changed", "app:resize", "draw:result"],
+        "defaultEnabled": true
       }
     ]
   }

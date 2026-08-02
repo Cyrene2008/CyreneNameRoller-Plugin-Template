@@ -1,4 +1,10 @@
 const events = [
+  ['app:ready', 'events:lifecycle', '插件系统与宿主就绪。'],
+  ['app:route-changed', 'events:lifecycle', '主路由或 Dock 页面发生变化。'],
+  ['app:theme-changed', 'events:lifecycle', '主题、深浅模式或动画偏好发生变化。'],
+  ['app:resize', 'events:lifecycle', '宿主可用视口发生变化。'],
+  ['draw:item-result', 'events:draw', '任意宿主抽取逐项结果。'],
+  ['draw:result', 'events:draw', '任意宿主抽取汇总结果。'],
   ['roller:start', 'events:draw', '随机点名开始。'],
   ['roller:item-result', 'events:draw', '随机点名逐项结果，适合逐个播放或展示。'],
   ['roller:result', 'events:draw', '随机点名汇总结果，每次操作一次。'],
@@ -18,6 +24,7 @@ const rpc = [
   ['records.read', 'records:read', '读取抽取历史快照；不可写。'],
   ['statistics.read', 'statistics:read', '读取 UUID 统计计数与总次数；不可写。'],
   ['balance.read', 'balance:read', '读取公平算法状态与公开参数；不可写。'],
+  ['draw.execute', 'draw:execute', '提交有限筛选条件；宿主完成 CAF、统计与历史追加事务。'],
   ['notifications.show', 'notifications:show', '显示宿主 Fluent 页面内通知。'],
   ['audio.select', 'audio:select', '让用户选择本地音频并返回 data URL。'],
   ['audio.play', 'audio:play', '播放已选择的本地音频。'],

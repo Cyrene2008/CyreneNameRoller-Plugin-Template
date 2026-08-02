@@ -13,10 +13,14 @@
     <nav>
       <a href="#overview">概览</a>
       <a href="#native">原生页面控件</a>
+      <a href="#dock">Dock 大型页面</a>
+      <a href="#draw">宿主抽取事务</a>
+      <a href="#motion">动画与视觉层</a>
       <a href="#gallery">Fluent 组件画廊</a>
       <a href="#events">事件</a>
       <a href="#rpc">RPC 与权限</a>
       <a href="#platform">跨平台能力</a>
+      <a href="#boundary">公平边界</a>
       <a href="#catalog">发布与目录</a>
     </nav>
     <button id="themeButton" class="button subtle">切换深浅主题</button>
@@ -24,7 +28,7 @@
 
   <main>
     <section id="overview" class="hero">
-      <div><span class="eyebrow">API 1.0.0</span><h1>做一个真正融入宿主的插件</h1><p>使用声明式 Fluent 页面、Worker 事件和权限化 RPC，在 Web 与 Tauri 上共享业务逻辑。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
+      <div><span class="eyebrow">Plugin API 1.1.0</span><h1>做一个真正融入宿主的插件</h1><p>用宿主 Fluent 设置、Dock 一级页面、CAF 抽取事务、动画包与 Canvas/WebGL 视觉层，在 Web 和 Tauri 上构建页面级大型功能。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
       <div class="hero-card"><div class="code-title"><span></span><span></span><span></span>manifest.json</div><pre><code>"native": {
   "type": "settings",
   "settingsKey": "settings",
@@ -32,7 +36,9 @@
     { "type": "toggle", "path": "enabled" },
     { "type": "range", "path": "volume" },
     { "type": "select", "path": "mode" },
-    { "type": "audio", "path": "sound" }
+    { "type": "audio", "path": "sound" },
+    { "type": "animation-select",
+      "target": "roller.finish" }
   ]
 }</code></pre></div>
     </section>
@@ -40,11 +46,52 @@
     <section id="native">
       <header><span class="eyebrow">Host-rendered</span><h2>原生插件页面控件</h2><p>这些控件可以写进 manifest，由 CyreneNameRoller 使用真实宿主 Fluent 组件渲染并自动跟随主题。</p></header>
       <div class="settings-card">
-        <div class="settings-head"><div class="app-icon">✦</div><div><h3>示例插件设置</h3><p>下面四种控件均可直接声明。</p></div></div>
+        <div class="settings-head"><div class="app-icon">✦</div><div><h3>示例插件设置</h3><p>下面控件由宿主直接渲染，不需要插件复制页面 CSS。</p></div></div>
         <div class="setting-row"><div><strong>Toggle</strong><span>布尔值开关</span></div><label class="toggle"><input id="demoToggle" type="checkbox" checked><i></i></label></div>
         <div class="setting-row"><div><strong>Range</strong><span>数值范围与步进</span></div><div class="range"><input id="demoRange" type="range" min="0" max="100" value="70"><output id="rangeValue">70%</output></div></div>
         <div class="setting-row"><div><strong>Select</strong><span>有限枚举选项</span></div><select><option>每次操作一次</option><option>每个结果一次</option></select></div>
         <div class="setting-row"><div><strong>Audio</strong><span>由用户选择本地音频</span></div><div class="inline"><button class="button secondary">选择音频</button><button class="button subtle">试听</button></div></div>
+        <div class="setting-row"><div><strong>Animation Select</strong><span>选择插件为宿主目标贡献的动画</span></div><select><option>棱镜弹跳</option><option>使用宿主默认</option></select></div>
+      </div>
+    </section>
+
+    <section id="dock">
+      <header><span class="eyebrow">First-level extension</span><h2>Dock 一级大型页面</h2><p><code>location: "dock"</code> 能把完整功能放进主 Dock。页面仍通过受控桥接调用宿主能力，不会因为位置更靠前而获得额外权限。</p></header>
+      <div class="two-column">
+        <pre><code>{
+  "id": "draw-studio",
+  "title": "抽取实验室",
+  "icon": "wand-24-regular",
+  "location": "dock",
+  "order": 720,
+  "entry": "pages/draw-studio.html"
+}</code></pre>
+        <div class="feature-list"><h3>适合什么</h3><p>教室座位表、全新点名玩法、课堂工具、可视化面板或其他页面级功能。</p><h3>如何调用宿主</h3><p>页面使用 <code>window.CyrenePlugin.request(method, args)</code>。主题、路由与抽取事件以只读消息发送。</p><h3>如何保持一致</h3><p>设置优先使用原生 schema；大型 HTML 页面参考本页 Fluent tokens，并为窄屏与深色模式设计。</p></div>
+      </div>
+    </section>
+
+    <section id="draw">
+      <header><span class="eyebrow">Host-owned transaction</span><h2>新玩法也使用宿主 CAF</h2><p>插件提交筛选条件，宿主选出结果、增加统计并追加历史。插件不能提交候选权重、赢家 ID 或自造记录。</p></header>
+      <div class="flow-grid">
+        <article class="flow-step"><b>1</b><strong>插件提交条件</strong><span>listId、people/groups、gender、count、allowDuplicates</span></article>
+        <article class="flow-step"><b>2</b><strong>宿主执行算法</strong><span>人员走 CAF；小组走宿主核心选择实现。</span></article>
+        <article class="flow-step"><b>3</b><strong>宿主原子提交</strong><span>统计与记录一并追加，写入 operationId 和 pluginId。</span></article>
+      </div>
+      <pre><code>const receipt = await window.CyrenePlugin.request('draw.execute', {
+  target: 'people', gender: 'all', count: 6, allowDuplicates: false
+})
+// receipt.results 是宿主生成的只读回执</code></pre>
+    </section>
+
+    <section id="motion">
+      <header><span class="eyebrow">Validated motion + isolated canvas</span><h2>动画包与视觉表面</h2><p>动画包适合改变宿主已有元素的呈现；Canvas/WebGL 表面适合粒子、极光和光带。两者都不会覆盖或替换真实结果。</p></header>
+      <div class="grid">
+        <article class="card"><h3>页面切换</h3><code>page.transition</code><p>支持 forward/backward variants，使 Dock 路由方向正确。</p></article>
+        <article class="card"><h3>结果强调</h3><code>roller.finish</code><p>用受校验的 WAAPI 属性保留可读性与核心结果。</p></article>
+        <article class="card"><h3>翻牌与发牌</h3><code>card.deal / card.flip</code><p>分别控制卡片入场与翻面强调。</p></article>
+        <article class="card"><h3>抽奖与全局</h3><code>lottery.finish / global.transition</code><p>用于庆典反馈和克制的全局过渡。</p></article>
+        <article class="card"><h3>Canvas / WebGL</h3><code>defineVisualSurface()</code><p>独立 Worker 绘制宿主内容后方的 OffscreenCanvas。</p></article>
+        <article class="card"><h3>生命周期</h3><code>app:theme-changed / app:resize</code><p>跟随主题、尺寸、性能动画和 reduced motion。</p></article>
       </div>
     </section>
 
@@ -62,9 +109,11 @@
       </div>
     </section>
 
-    <section id="events"><header><span class="eyebrow">Worker events</span><h2>可订阅事件</h2><p>需要 `events:draw` 权限。逐项事件适合每个结果执行，汇总事件适合每次操作执行一次。</p></header><div id="eventsTable" class="table"></div></section>
-    <section id="rpc"><header><span class="eyebrow">Permissioned bridge</span><h2>全部 RPC 与权限</h2><p>核心名单、历史记录、统计和平衡信息只读；`storage.write` 只写插件自己的命名空间。</p></header><div id="rpcTable" class="table"></div></section>
+    <section id="events"><header><span class="eyebrow">Worker events</span><h2>可订阅事件</h2><p>抽取事件需要 <code>events:draw</code>，应用生命周期需要 <code>events:lifecycle</code>。逐项事件适合逐个反馈，汇总事件适合一次操作只执行一次。</p></header><div id="eventsTable" class="table"></div></section>
+    <section id="rpc"><header><span class="eyebrow">Permissioned bridge</span><h2>全部 RPC 与权限</h2><p>核心名单、既有历史、统计和平衡信息只读；唯一核心追加入口是 <code>draw.execute</code>，<code>storage.write</code> 只写插件自己的命名空间。</p></header><div id="rpcTable" class="table"></div></section>
     <section id="platform"><header><span class="eyebrow">Web + Tauri</span><h2>平台能力</h2><p>先读取 `runtime.capabilities`。不可用的可选能力返回结构化结果，插件应提供 Web fallback 或安全跳过。</p></header><div id="platformTable" class="table"></div></section>
+
+    <section id="boundary"><header><span class="eyebrow">Freedom with a hard floor</span><h2>创作自由与不可破坏的底线</h2><p>插件可构建大型页面、业务流程和表现层，但公平相关状态由宿主拥有。</p></header><div class="boundary-grid"><article><h3>允许</h3><ul><li>添加 Dock 页面和插件子页面</li><li>调用宿主 CAF 发起新抽取</li><li>追加宿主生成的统计与记录事务</li><li>读取名单、记录、统计、公开平衡快照</li><li>扩展动画、音频、Canvas/WebGL 和平台兼容流程</li></ul></article><article><h3>不允许</h3><ul><li>指定赢家、候选权重或伪造结果</li><li>改写/删除既有历史和统计</li><li>修改 CAF 参数或关闭公平约束</li><li>覆盖真实点名/抽奖结果</li><li>绕过声明权限直接访问宿主内部状态</li></ul></article></div></section>
 
     <section id="catalog"><header><span class="eyebrow">Release automation</span><h2>发布与插件目录</h2><p>目录不固定版本和下载 URL。宿主从 GitHub 最新正式 Release 自动解析 `.cnrp` 资源和 SHA-256。</p></header><div class="two-column"><pre><code>{
   "repository": "owner/repository",
@@ -76,7 +125,7 @@
   "publisherKey": "base64-spki"
 }</code></pre><div class="checklist"><h3>发布检查</h3><label>✓ Tag 使用 v1.2.3</label><label>✓ Release 非 draft / prerelease</label><label>✓ 仅一个资源匹配 assetPattern</label><label>✓ 包内版本与 tag 一致</label><label>✓ 发布者私钥不进入仓库</label></div></div></section>
 
-    <footer>CyreneNameRoller Plugin API 1.0.0 · 2026</footer>
+    <footer>CyreneNameRoller Plugin API 1.1.0 · 2026</footer>
   </main>
 
   <div id="toast" class="toast" role="status"><strong>Fluent 通知</strong><span>这是一条页面内通知。</span></div>
