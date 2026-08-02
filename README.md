@@ -97,4 +97,4 @@ API 1.2 使用通用宿主扩展模型：先用 `describeHost()` 发现资源、
 
 先读取 `context.platform` / `context.capabilities`，再决定使用宿主桥接还是 Web fallback。不可用的可选系统能力会返回结构化 `UNSUPPORTED_PLATFORM`，插件应安全跳过或显示平台专属 UI，不应直接调用 PowerShell、CMD、Tauri API 或宿主内部模块。
 
-完整参考请访问 [GitHub Pages：API 1.2、Fluent 组件画廊与扩展点文档](cnrp-template.cyrene.hk)。
+完整参考请访问 [GitHub Pages：API 1.2、Fluent 组件画廊与扩展点文档](http://cnrp-template.cyrene.hk)。
