@@ -1,7 +1,7 @@
 const events = [
   ['app:ready', 'events:lifecycle', '插件系统与宿主就绪。'],
   ['app:route-changed', 'events:lifecycle', '主路由或 Dock 页面发生变化。'],
-  ['app:theme-changed', 'events:lifecycle', '主题、深浅模式或动画偏好发生变化。'],
+  ['app:theme-changed', 'events:lifecycle', '提供 theme、dark、accent、perfAnimations、reducedMotion；视觉层必须据此暂停或恢复。'],
   ['app:resize', 'events:lifecycle', '宿主可用视口发生变化。'],
   ['draw:item-result', 'events:draw', '任意宿主抽取逐项结果。'],
   ['draw:result', 'events:draw', '任意宿主抽取汇总结果。'],

@@ -8,7 +8,11 @@ let timer = null
 let particles = []
 let burstUntil = 0
 let dark = false
-let reducedMotion = false
+let motionDisabled = false
+
+function clearCanvas() {
+  if (context && canvas) context.clearRect(0, 0, canvas.width, canvas.height)
+}
 
 function resetParticles() {
   const width = Math.max(1, viewport.pixelWidth)
@@ -54,7 +58,7 @@ function render() {
 }
 
 function start() {
-  if (timer || reducedMotion) return
+  if (timer || motionDisabled) return
   timer = setInterval(render, 1000 / 30)
 }
 
@@ -75,21 +79,29 @@ defineVisualSurface({
     canvas.width = Math.max(1, viewport.pixelWidth)
     canvas.height = Math.max(1, viewport.pixelHeight)
     resetParticles()
+    if (motionDisabled) clearCanvas()
+    else render()
   },
 
   onEvent(event, payload) {
     if (event === 'app:theme-changed') {
       dark = payload?.mode === 'dark' || payload?.dark === true
-      reducedMotion = payload?.reducedMotion === true || payload?.perfAnimations === false
-      if (reducedMotion) stop()
-      else start()
-      render()
+      motionDisabled = payload?.reducedMotion === true || payload?.perfAnimations === false
+      if (motionDisabled) {
+        stop()
+        burstUntil = 0
+        clearCanvas()
+      } else {
+        render()
+        start()
+      }
     }
-    if (event === 'draw:result' && !reducedMotion) burstUntil = Date.now() + 950
+    if (event === 'draw:result' && !motionDisabled) burstUntil = Date.now() + 950
   },
 
   deactivate() {
     stop()
+    clearCanvas()
     particles = []
     context = null
     canvas = null

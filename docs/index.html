@@ -91,7 +91,17 @@
         <article class="card"><h3>翻牌与发牌</h3><code>card.deal / card.flip</code><p>分别控制卡片入场与翻面强调。</p></article>
         <article class="card"><h3>抽奖与全局</h3><code>lottery.finish / global.transition</code><p>用于庆典反馈和克制的全局过渡。</p></article>
         <article class="card"><h3>Canvas / WebGL</h3><code>defineVisualSurface()</code><p>独立 Worker 绘制宿主内容后方的 OffscreenCanvas。</p></article>
-        <article class="card"><h3>生命周期</h3><code>app:theme-changed / app:resize</code><p>跟随主题、尺寸、性能动画和 reduced motion。</p></article>
+        <article class="card"><h3>生命周期</h3><code>app:theme-changed / app:resize</code><p>跟随主题、尺寸、宿主动画开关和系统 reduced motion；禁用时必须停止循环并清空动态画布。</p></article>
+      </div>
+      <div class="two-column motion-contract">
+        <pre><code>{
+  "theme": "peach | fluent | custom",
+  "dark": false,
+  "accent": "#D84B82",
+  "perfAnimations": true,
+  "reducedMotion": false
+}</code></pre>
+        <div class="feature-list"><h3>视觉性能合约</h3><p>宿主会缓存最新主题状态，并在视觉层完成 activate 与初始 resize 后回放。</p><p>当 <code>perfAnimations === false</code> 或 <code>reducedMotion === true</code> 时，停止 interval/requestAnimationFrame、清空动态画布；恢复后检查现有句柄，只启动一个循环。</p><p>只跳过绘制但继续调度空帧不符合合约。</p></div>
       </div>
     </section>
 

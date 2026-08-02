@@ -39,6 +39,22 @@ npm run build
 
 HTML 页面适合大型交互，但它运行在受控页面环境中，不能直接访问宿主 DOM。普通设置优先使用宿主原生 schema，能够自动继承桃粉、Fluent、自定义主题以及深浅模式。
 
+### 主题与视觉性能合约
+
+视觉表面可订阅 `app:theme-changed`。宿主会缓存最新状态，并在视觉 Worker 完成 `activate(context)` 和初始 `onResize(viewport)` 后回放：
+
+```js
+{
+  theme: 'peach' | 'fluent' | 'custom',
+  dark: boolean,
+  accent: '#RRGGBB',
+  perfAnimations: boolean,
+  reducedMotion: boolean
+}
+```
+
+Canvas/WebGL 插件必须同时尊重 `perfAnimations === false` 和 `reducedMotion === true`：停止计时器或动画帧、清空动态画布，并在两者恢复后只启动一个渲染循环。不要仅跳过绘制却继续以高频率调度空帧。`src/visual.js` 展示了完整的暂停、清理和单循环恢复模式。
+
 ## SDK 版本
 
 模板在 `vendor/` 中携带官方 `@cyrene2008/cyrene-name-roller@1.1.0` SDK `.tgz`，因此克隆后无需 registry Token 即可安装。升级 SDK 时，用新版官方包替换该文件，并同步更新 `package.json`、锁文件与 `manifest.json` 的 `engine`。
