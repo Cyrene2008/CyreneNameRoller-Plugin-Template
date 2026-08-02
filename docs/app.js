@@ -3,6 +3,7 @@ const events = [
   ['app:route-changed', 'events:lifecycle', '主路由或 Dock 页面发生变化。'],
   ['app:theme-changed', 'events:lifecycle', '提供 theme、dark、accent、perfAnimations、reducedMotion；视觉层必须据此暂停或恢复。'],
   ['app:resize', 'events:lifecycle', '宿主可用视口发生变化。'],
+  ['plugin:storage-changed', 'events:lifecycle', '仅通知写入该键的插件，并覆盖其 Worker、页面和已订阅视觉层。'],
   ['draw:item-result', 'events:draw', '任意宿主抽取逐项结果。'],
   ['draw:result', 'events:draw', '任意宿主抽取汇总结果。'],
   ['roller:start', 'events:draw', '随机点名开始。'],
@@ -35,7 +36,7 @@ const rpc = [
   ['system.clipboard-write', 'system:clipboard-write', '写入剪贴板文本。'],
   ['system.reveal-file', 'system:reveal-file', '定位本次运行中用户已授权的路径。'],
   ['system.execute', 'system:execute', '执行清单中固定声明的桌面系统操作。'],
-  ['dependency.storage.read', '依赖 dataAccess', '读取前置插件明确共享的数据。']
+  ['dependency.storage.read', '依赖 dataAccess', '通过 readDependencyStorage() 读取前置插件明确共享的数据。']
 ]
 
 const platforms = [

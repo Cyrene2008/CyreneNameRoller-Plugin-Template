@@ -34,6 +34,7 @@ npm run build
 | Dock 大型页面 | `pages/draw-studio.*` | `location: "dock"`、`window.CyrenePlugin.request()` |
 | 新点名玩法 | `pages/draw-studio.js` | `draw.execute`，宿主生成并提交结果 |
 | 事件与轻量后台逻辑 | `src/worker.js` | `events:draw`、`events:lifecycle` |
+| 前置插件共享数据 | SDK `readDependencyStorage()` | 依赖声明 `dataAccess` 与目标插件 `shareData` |
 | 动画扩展 | `animations/template-motion.json` | 受校验的 WAAPI 关键帧 |
 | Canvas/WebGL 表现层 | `src/visual.js` | `defineVisualSurface()`、OffscreenCanvas |
 
