@@ -16,7 +16,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run validate
-      - run: npm run build
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.1
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run validate
+      - run: pnpm run build

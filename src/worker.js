@@ -1,4 +1,4 @@
-import { definePlugin, PluginEvents } from '@cyrene2008/cyrene-name-roller/plugin-sdk'
+import { definePlugin, describeHost, PluginEvents } from '@starcyrene/cyrene-name-roller/plugin-sdk'
 
 const DEFAULTS = { enabled: true, volume: 0.7, mode: 'summary', sound: null }
 let request
@@ -46,6 +46,11 @@ definePlugin({
       type: 'info',
       duration: 3500
     })
+  },
+
+  async onCommand(commandId) {
+    if (commandId !== 'refresh') return { handled: false }
+    return { handled: true, settings: await settings() }
   },
 
   async deactivate() {

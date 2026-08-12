@@ -1,4 +1,4 @@
-import { defineVisualSurface } from '@cyrene2008/cyrene-name-roller/plugin-sdk'
+import { defineVisualSurface } from '@starcyrene/cyrene-name-roller/plugin-sdk'
 
 const PARTICLE_COUNT = 34
 let canvas

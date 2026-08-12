@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "root": {
+    "type": "Stack",
+    "props": { "gap": 12, "padding": 12 },
+    "children": [
+      { "type": "Text", "props": { "text": "累计点名次数" } },
+      { "type": "Text", "bindings": { "text": "$resource.statistics.totalCount" } },
+      { "type": "Button", "props": { "label": "读取插件设置" }, "action": { "command": "refresh", "args": {} } }
+    ]
+  }
+}

@@ -39,7 +39,11 @@ const rpc = [
   ['system.clipboard-write', 'system:clipboard-write', '写入剪贴板文本。'],
   ['system.reveal-file', 'system:reveal-file', '定位本次运行中用户已授权的路径。'],
   ['system.execute', 'system:execute', '执行清单中固定声明的桌面系统操作。'],
-  ['dependency.storage.read', '依赖 dataAccess', '通过 readDependencyStorage() 读取前置插件明确共享的数据。']
+  ['dependency.storage.read', '依赖 dataAccess', '通过 readDependencyStorage() 读取前置插件明确共享的数据。'],
+  ['componentStylePacks', 'ui:component-styles', '按稳定组件 ID 声明受限大小、颜色、字号、字重、间距与宿主字体别名。'],
+  ['componentOverridePacks', 'ui:component-overrides', '仅隐藏或压缩宿主允许的 optional 目标；覆盖包原子应用。'],
+  ['nativeViews', 'ui:native-views', '在三个固定 slot: 插槽中渲染宿主校验的声明式 Schema。'],
+  ['resultPresentations', 'ui:result-presentations', '只声明权威结果布局；姓名、结果与 Receipt 由宿主注入。']
 ]
 
 const platforms = [
