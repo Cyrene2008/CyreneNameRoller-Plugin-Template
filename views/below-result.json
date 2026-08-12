@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "root": {
+    "type": "Notice",
+    "props": { "variant": "info", "padding": 10 },
+    "children": [
+      { "type": "Text", "props": { "text": "上方姓名、结果数组和 Receipt 均由宿主绑定并校验。" } },
+      {
+        "type": "Grid",
+        "props": { "columns": 2, "gap": 8 },
+        "children": [
+          { "type": "Badge", "bindings": { "text": "$host.theme.language" } },
+          { "type": "Text", "bindings": { "text": "$host.theme.dark" } }
+        ]
+      },
+      { "type": "Button", "props": { "label": "发现宿主能力" }, "action": { "command": "describe-host", "args": {} } }
+    ]
+  }
+}

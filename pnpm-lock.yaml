@@ -201,7 +201,7 @@ packages:
     engines: {node: '>=4.0'}
 
   '@starcyrene/cyrene-name-roller@file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz':
-    resolution: {integrity: sha512-r9cl/yIf7Okh/qU89DmSv67JTy8RpGyI1l+o7J1gTJTcRjnGAJoSlUqPKqFRlYBzXRoz4eHLh7V/FkSfaPZOSA==, tarball: file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz}
+    resolution: {integrity: sha512-52JmeSFtXBHRk04MOX4bvikaNuzlTwOhHE/FxGvD9feOgJnlOUQdXPZEgMqd0i5UIkpYE3Ns7BzRVuLT6bFw8g==, tarball: file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz}
     version: 1.3.0
     engines: {node: '>=20'}
     hasBin: true

@@ -14,6 +14,7 @@
       <a href="#overview">概览</a>
       <a href="#native">原生页面控件</a>
       <a href="#ui-customization">API 1.3 UI 定制</a>
+      <a href="#api13-examples">API 1.3 示例</a>
       <a href="#dock">Dock 大型页面</a>
       <a href="#draw">宿主抽取事务</a>
       <a href="#motion">动画与视觉层</a>
@@ -48,25 +49,32 @@
     <section id="ui-customization">
       <header><span class="eyebrow">API 1.3 host-owned UI</span><h2>受限组件样式、固定插槽与权威结果</h2><p>插件只声明意图，宿主负责校验、解析和渲染。插件不会获得 Vue 组件、宿主 DOM、任意 CSS 或核心算法引用。</p></header>
       <div class="grid">
-        <article class="card"><h3>稳定组件 ID</h3><code>componentStylePacks</code><p>只允许宿主公布的大小、语义颜色、字号、字重、间距、圆角和字体别名；选择器、CSS 文件、网络值和布局逃逸属性会被拒绝。</p></article>
-        <article class="card"><h3>可选筛选组件</h3><code>roller.filters</code><p>这是首批目标中明确可隐藏或压缩的 optional 组件。隐藏后宿主仍使用当前或默认点名范围。</p></article>
-        <article class="card"><h3>固定原生插槽</h3><code>slot:roller.side-panel</code><p>Schema 只接受白名单节点、语义图标、只读资源绑定和宿主代理命令。未知插槽报告 unavailable。</p></article>
-        <article class="card"><h3>VerifiedResult</h3><code>resultPresentations</code><p>插件只能选择受限布局；姓名、结果数组和 Receipt 由宿主绑定，保存失败不会显示已成功提交。</p></article>
+        <article class="card"><h3>稳定组件 ID</h3><code>3 packs · 11 targets</code><p>示例覆盖导航、点名、卡牌、抽奖和统计，只允许宿主公布的样式属性与字体别名。</p></article>
+        <article class="card"><h3>Optional 布局</h3><code>collapse · compact · reserve</code><p>三个覆盖包分别展示隐藏并收起、可见但压缩、隐藏但保留空间。</p></article>
+        <article class="card"><h3>固定原生插槽</h3><code>3 slot: views</code><p>侧栏、结果下方和记录工具栏都使用白名单 Schema、语义图标、只读绑定和宿主代理命令。</p></article>
+        <article class="card"><h3>VerifiedResult</h3><code>single · list · grid · spotlight</code><p>四种布局只改变呈现；姓名、结果数组和 Receipt 始终由宿主绑定。</p></article>
         <article class="card"><h3>独立 Principal</h3><code>Worker · Page · Visual · Command</code><p>每个实例仅获得自己的权限。禁用、崩溃、卸载或版本失配后，宿主撤销身份并关闭页面 MessagePort。</p></article>
         <article class="card"><h3>安全模式</h3><code>safemode.json</code><p>只能通过配置文件启用；Tauri 修改后重启，Web 修改部署文件后重新加载。安全模式不加载任何插件能力。</p></article>
       </div>
       <div class="two-column">
-        <pre><code>"componentOverridePacks": [{
-  "id": "focus-mode",
-  "targets": {
-    "roller.filters": {
-      "visibility": "hidden",
-      "layout": "compact"
-    }
-  }
-}]</code></pre>
+        <pre><code>"componentOverridePacks": [
+  { "id": "focus-mode",
+    "targets": { "roller.filters":
+      { "visibility": "hidden", "layout": "collapse" } } },
+  { "id": "compact-filters",
+    "targets": { "roller.filters":
+      { "visibility": "visible", "layout": "compact" } } },
+  { "id": "minimal-statistics",
+    "targets": { "statistics.summary":
+      { "visibility": "hidden", "layout": "reserve" } } }
+]</code></pre>
         <div class="feature-list"><h3>固定插槽</h3><p><code>slot:roller.side-panel</code>、<code>slot:roller.below-result</code>、<code>slot:records.toolbar</code>。</p><h3>不可隐藏</h3><p>权威结果、名单身份、错误、完整性状态与恢复入口。覆盖包预检失败时整体拒绝，不会部分生效。</p><h3>页面通信</h3><p>页面仍调用 <code>window.CyrenePlugin.request()</code>；API 1.3 由宿主内部使用 MessageChannel，API 1.2 保留 source-checked window.message 兼容路径。</p></div>
       </div>
+    </section>
+
+    <section id="api13-examples">
+      <header><span class="eyebrow">Runnable template inventory</span><h2>可校验、打包和运行的 API 1.3 示例</h2><p>这些项目都位于模板源码中，并由同一份 manifest 交给 CLI 与宿主解析；创建插件后可按需删除不使用的贡献和权限。</p></header>
+      <div id="api13ExamplesTable" class="table"></div>
     </section>
 
     <section id="native">

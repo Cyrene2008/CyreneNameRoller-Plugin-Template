@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "cn.example.cyrene.plugin",
   "name": "Cyrene Plugin Template",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": "Your Name",
   "description": "A first-party-style CyreneNameRoller plugin template.",
   "engine": { "min": "1.3.0", "max": "1.3.0" },
@@ -77,7 +77,10 @@
       }
     ],
     "commands": [
-      { "id": "refresh", "title": "刷新插件", "titleEn": "Refresh plugin", "locations": ["command-palette", "page-header"], "icon": "arrow-clockwise-24-regular", "order": 300 }
+      { "id": "refresh", "title": "刷新插件", "titleEn": "Refresh plugin", "locations": ["command-palette", "page-header"], "icon": "arrow-clockwise-24-regular", "order": 300 },
+      { "id": "draw-one", "title": "宿主点名一次", "titleEn": "Draw one", "locations": ["command-palette"], "order": 310 },
+      { "id": "show-statistics", "title": "读取统计快照", "titleEn": "Show statistics", "locations": ["command-palette"], "order": 320 },
+      { "id": "describe-host", "title": "发现宿主能力", "titleEn": "Describe host", "locations": ["command-palette"], "order": 330 }
     ],
     "componentStylePacks": [
       {
@@ -103,6 +106,101 @@
             "alignment": "center",
             "padding": "comfortable",
             "gap": "comfortable"
+          },
+          "lottery.result": {
+            "size": "large",
+            "foreground": "#172033",
+            "background": "#ffffff",
+            "fontFamily": "host:display",
+            "fontSize": 48,
+            "fontWeight": 700,
+            "alignment": "center"
+          }
+        }
+      },
+      {
+        "id": "compact-navigation",
+        "title": "紧凑导航",
+        "targets": {
+          "navigation.dock": {
+            "size": "small",
+            "foreground": "#ffffff",
+            "background": "#243447",
+            "fontFamily": "host:ui",
+            "fontSize": 14,
+            "fontWeight": 600,
+            "density": "compact"
+          },
+          "roller.current-list": {
+            "size": "medium",
+            "foreground": "#172033",
+            "background": "#ffffff",
+            "fontFamily": "host:ui",
+            "fontSize": 14,
+            "fontWeight": 600,
+            "padding": "compact",
+            "gap": "compact"
+          },
+          "roller.filters": {
+            "size": "small",
+            "foreground": "#172033",
+            "background": "#f3f6f9",
+            "fontFamily": "host:ui",
+            "fontSize": 13,
+            "fontWeight": 500,
+            "padding": "compact",
+            "gap": "compact"
+          },
+          "app.version-badge": {
+            "foreground": "#ffffff",
+            "background": "#536878",
+            "fontFamily": "host:numeric",
+            "fontSize": 11,
+            "fontWeight": 600,
+            "padding": "compact"
+          }
+        }
+      },
+      {
+        "id": "cards-and-statistics",
+        "title": "卡牌与统计",
+        "targets": {
+          "card.controls": {
+            "size": "small",
+            "foreground": "#172033",
+            "background": "#f3f6f9",
+            "fontFamily": "host:ui",
+            "fontSize": 14,
+            "fontWeight": 600,
+            "padding": "compact",
+            "gap": "compact"
+          },
+          "card.deck": {
+            "size": "medium",
+            "foreground": "#172033",
+            "background": "#ffffff",
+            "padding": "comfortable",
+            "gap": "normal"
+          },
+          "card.item": {
+            "size": "medium",
+            "foreground": "#172033",
+            "background": "#ffffff",
+            "fontFamily": "host:display",
+            "fontSize": 20,
+            "fontWeight": 700,
+            "radius": 10,
+            "shadow": "medium"
+          },
+          "statistics.summary": {
+            "size": "small",
+            "foreground": "#172033",
+            "background": "#eef5f7",
+            "fontFamily": "host:numeric",
+            "fontSize": 14,
+            "fontWeight": 600,
+            "padding": "normal",
+            "gap": "compact"
           }
         }
       }
@@ -113,7 +211,21 @@
         "title": "精简点名界面",
         "targets": {
           "app.version-badge": { "visibility": "hidden", "layout": "collapse" },
-          "roller.filters": { "visibility": "hidden", "layout": "compact" }
+          "roller.filters": { "visibility": "hidden", "layout": "collapse" }
+        }
+      },
+      {
+        "id": "compact-filters",
+        "title": "紧凑筛选器",
+        "targets": {
+          "roller.filters": { "visibility": "visible", "layout": "compact" }
+        }
+      },
+      {
+        "id": "minimal-statistics",
+        "title": "最小统计界面",
+        "targets": {
+          "statistics.summary": { "visibility": "hidden", "layout": "reserve" }
         }
       }
     ],
@@ -124,11 +236,71 @@
         "titleEn": "Roller statistics",
         "slot": "slot:roller.side-panel",
         "source": "views/roller-stats.json",
-        "uses": ["statistics:read"],
+        "uses": ["statistics:read", "draw:execute"],
         "order": 200
+      },
+      {
+        "id": "below-result",
+        "title": "结果上下文",
+        "titleEn": "Result context",
+        "slot": "slot:roller.below-result",
+        "source": "views/below-result.json",
+        "uses": [],
+        "order": 210
+      },
+      {
+        "id": "records-toolbar",
+        "title": "记录工具栏",
+        "titleEn": "Records toolbar",
+        "slot": "slot:records.toolbar",
+        "source": "views/records-toolbar.json",
+        "uses": ["statistics:read"],
+        "order": 100
       }
     ],
     "resultPresentations": [
+      {
+        "id": "single-compact",
+        "title": "单人紧凑",
+        "titleEn": "Single compact",
+        "targets": ["roller.result"],
+        "layout": "single",
+        "style": {
+          "size": "small",
+          "alignment": "start",
+          "showAlgorithm": false,
+          "showOperationId": false,
+          "showEnglishName": true
+        }
+      },
+      {
+        "id": "list-readable",
+        "title": "易读列表",
+        "titleEn": "Readable list",
+        "targets": ["roller.result"],
+        "layout": "list",
+        "style": {
+          "size": "medium",
+          "alignment": "start",
+          "showAlgorithm": true,
+          "showOperationId": false,
+          "showEnglishName": true
+        }
+      },
+      {
+        "id": "grid-summary",
+        "title": "网格摘要",
+        "titleEn": "Grid summary",
+        "targets": ["roller.result"],
+        "layout": "grid",
+        "style": {
+          "size": "medium",
+          "alignment": "center",
+          "showAlgorithm": false,
+          "showOperationId": true,
+          "showEnglishName": false
+        }
+      },
       {
         "id": "spotlight",
         "title": "聚光结果",

@@ -55,6 +55,16 @@ const platforms = [
   ['system.execute', '安全跳过', 'Tauri ✓（固定清单操作）']
 ]
 
+const api13Examples = [
+  ['componentStylePacks', 'manifest.json', '3 个样式包，覆盖 11 个稳定组件目标。'],
+  ['componentOverridePacks', 'manifest.json', 'collapse、compact、reserve 三种 optional 布局语义。'],
+  ['slot:roller.side-panel', 'views/roller-stats.json', '统计资源绑定、Progress 与宿主权威点名命令。'],
+  ['slot:roller.below-result', 'views/below-result.json', '宿主主题绑定与 host.describe 能力发现。'],
+  ['slot:records.toolbar', 'views/records-toolbar.json', '语义图标与只读统计查询。'],
+  ['resultPresentations', 'manifest.json', 'single、list、grid、spotlight 四种宿主绑定布局。'],
+  ['Worker commands', 'src/worker.js', '私有设置、权威抽签、只读资源与宿主发现。']
+]
+
 function table(target, headings, rows) {
   const node = document.getElementById(target)
   node.innerHTML = `<div class="table-row head">${headings.map(value => `<strong>${value}</strong>`).join('')}</div>` + rows.map(row => `<div class="table-row"><code>${row[0]}</code><strong>${row[1]}</strong><span>${row[2]}</span></div>`).join('')
@@ -63,6 +73,7 @@ function table(target, headings, rows) {
 table('eventsTable', ['事件', '权限', '说明'], events)
 table('rpcTable', ['RPC', '权限', '说明'], rpc)
 table('platformTable', ['能力', 'Web', 'Tauri'], platforms)
+table('api13ExamplesTable', ['贡献或插槽', '示例文件', '示范内容'], api13Examples)
 
 const root = document.documentElement
 const savedTheme = localStorage.getItem('cyrene-docs-theme')

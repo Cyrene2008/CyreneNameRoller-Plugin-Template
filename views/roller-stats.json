@@ -4,9 +4,17 @@
     "type": "Stack",
     "props": { "gap": 12, "padding": 12 },
     "children": [
-      { "type": "Text", "props": { "text": "累计点名次数" } },
-      { "type": "Text", "bindings": { "text": "$resource.statistics.totalCount" } },
-      { "type": "Button", "props": { "label": "读取插件设置" }, "action": { "command": "refresh", "args": {} } }
+      {
+        "type": "Grid",
+        "props": { "columns": 2, "gap": 8 },
+        "children": [
+          { "type": "Icon", "props": { "icon": "history" } },
+          { "type": "Text", "props": { "text": "点名统计" } }
+        ]
+      },
+      { "type": "Badge", "bindings": { "text": "$resource.statistics.totalCount" } },
+      { "type": "Progress", "props": { "max": 100 }, "bindings": { "value": "$resource.statistics.totalCount" } },
+      { "type": "Button", "props": { "label": "宿主点名一次" }, "action": { "command": "draw-one", "args": {} } }
     ]
   }
 }
