@@ -20,9 +20,9 @@ CyreneNameRoller Plugin API 1.2 官方模板。点击 GitHub 的 **Use this temp
 4. 安装 SDK 并校验：
 
 ```bash
-npm install
-npm run validate
-npm run build
+bun install
+bun run validate
+bun run build
 ```
 
 生成的插件位于 `dist/cyrene-plugin-template.cnrp`。本地调试时可在 CyreneNameRoller 的插件页面导入 `.cnrp`。
