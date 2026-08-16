@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>CyreneNameRoller 插件开发中心</title>
-  <link rel="stylesheet" href="styles.css?v=1.3.0">
+  <link rel="stylesheet" href="styles.css?v=1.4.0">
 </head>
 <body>
   <aside class="nav">
@@ -13,8 +13,8 @@
     <nav>
       <a href="#overview">概览</a>
       <a href="#native">原生页面控件</a>
-      <a href="#ui-customization">API 1.3 UI 定制</a>
-      <a href="#api13-examples">API 1.3 示例</a>
+      <a href="#ui-customization">API 1.4 UI 定制</a>
+      <a href="#api14-examples">API 1.4 示例</a>
       <a href="#dock">Dock 大型页面</a>
       <a href="#draw">宿主抽取事务</a>
       <a href="#motion">动画与视觉层</a>
@@ -31,7 +31,7 @@
 
   <main>
     <section id="overview" class="hero">
-      <div><span class="eyebrow">Plugin API 1.3.0</span><h1>做一个真正融入宿主的插件</h1><p>用宿主 Fluent 设置、受限 UI 定制、固定插槽、权威抽签事务、动画包与 Canvas/WebGL 视觉层，在 Web 和 Tauri 上构建页面级大型功能。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
+      <div><span class="eyebrow">Plugin API 1.4.0</span><h1>做一个真正融入宿主的插件</h1><p>用宿主 Fluent 设置、受限 UI 定制、固定插槽、权威抽签事务、动画包与 Canvas/WebGL 视觉层，在 Web 和 Tauri 上构建页面级大型功能。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
       <div class="hero-card"><div class="code-title"><span></span><span></span><span></span>manifest.json</div><pre><code>"native": {
   "type": "settings",
   "settingsKey": "settings",
@@ -40,17 +40,22 @@
     { "type": "range", "path": "volume" },
     { "type": "select", "path": "mode" },
     { "type": "audio", "path": "sound" },
-    { "type": "animation-select",
-      "target": "roller.finish" }
+    { "type": "component-style-select",
+      "target": "roller.result" },
+    { "type": "component-override-toggle",
+      "target": "statistics.summary",
+      "packId": "minimal-statistics" },
+    { "type": "result-presentation-select",
+      "target": "roller.result" }
   ]
 }</code></pre></div>
     </section>
 
     <section id="ui-customization">
-      <header><span class="eyebrow">API 1.3 host-owned UI</span><h2>受限组件样式、固定插槽与权威结果</h2><p>插件只声明意图，宿主负责校验、解析和渲染。插件不会获得 Vue 组件、宿主 DOM、任意 CSS 或核心算法引用。</p></header>
+      <header><span class="eyebrow">API 1.4 host-owned UI</span><h2>受限组件样式、固定插槽与权威结果</h2><p>插件只声明意图，宿主负责校验、解析和渲染。插件不会获得 Vue 组件、宿主 DOM、任意 CSS 或核心算法引用。</p></header>
       <div class="grid">
-        <article class="card"><h3>稳定组件 ID</h3><code>3 packs · 11 targets</code><p>示例覆盖导航、点名、卡牌、抽奖和统计，只允许宿主公布的样式属性与字体别名。</p></article>
-        <article class="card"><h3>Optional 布局</h3><code>collapse · compact · reserve</code><p>三个覆盖包分别展示隐藏并收起、可见但压缩、隐藏但保留空间。</p></article>
+        <article class="card"><h3>稳定组件 ID</h3><code>11 styled · 6 hide-only</code><p>示例覆盖导航、点名、卡牌、抽奖和统计；API 1.4 另提供六个细粒度筛选器目标。</p></article>
+        <article class="card"><h3>原生贡献选择</h3><code>select · toggle</code><p>设置页可直接切换样式包、覆盖包和宿主绑定的权威结果布局。</p></article>
         <article class="card"><h3>固定原生插槽</h3><code>3 slot: views</code><p>侧栏、结果下方和记录工具栏都使用白名单 Schema、语义图标、只读绑定和宿主代理命令。</p></article>
         <article class="card"><h3>VerifiedResult</h3><code>single · list · grid · spotlight</code><p>四种布局只改变呈现；姓名、结果数组和 Receipt 始终由宿主绑定。</p></article>
         <article class="card"><h3>独立 Principal</h3><code>Worker · Page · Visual · Command</code><p>每个实例仅获得自己的权限。禁用、崩溃、卸载或版本失配后，宿主撤销身份并关闭页面 MessagePort。</p></article>
@@ -68,13 +73,13 @@
     "targets": { "statistics.summary":
       { "visibility": "hidden", "layout": "reserve" } } }
 ]</code></pre>
-        <div class="feature-list"><h3>固定插槽</h3><p><code>slot:roller.side-panel</code>、<code>slot:roller.below-result</code>、<code>slot:records.toolbar</code>。</p><h3>不可隐藏</h3><p>权威结果、名单身份、错误、完整性状态与恢复入口。覆盖包预检失败时整体拒绝，不会部分生效。</p><h3>页面通信</h3><p>页面仍调用 <code>window.CyrenePlugin.request()</code>；API 1.3 由宿主内部使用 MessageChannel，API 1.2 保留 source-checked window.message 兼容路径。</p></div>
+        <div class="feature-list"><h3>细粒度筛选器</h3><p><code>roller.filter.english-mode</code>、<code>draw-target</code>、<code>gender</code>、<code>draw-count</code>、<code>duplicates</code> 与 <code>count</code> 仅允许收起。</p><h3>不可隐藏</h3><p>权威结果、名单身份、错误、完整性状态与恢复入口。覆盖包预检失败时整体拒绝，不会部分生效。</p><h3>页面通信</h3><p>页面仍调用 <code>window.CyrenePlugin.request()</code>；API 1.4 由宿主内部使用 MessageChannel，API 1.2 保留 source-checked window.message 兼容路径。</p></div>
       </div>
     </section>
 
-    <section id="api13-examples">
-      <header><span class="eyebrow">Runnable template inventory</span><h2>可校验、打包和运行的 API 1.3 示例</h2><p>这些项目都位于模板源码中，并由同一份 manifest 交给 CLI 与宿主解析；创建插件后可按需删除不使用的贡献和权限。</p></header>
-      <div id="api13ExamplesTable" class="table"></div>
+    <section id="api14-examples">
+      <header><span class="eyebrow">Runnable template inventory</span><h2>可校验、打包和运行的 API 1.4 示例</h2><p>这些项目都位于模板源码中，并由同一份 manifest 交给 CLI 与宿主解析；创建插件后可按需删除不使用的贡献和权限。</p></header>
+      <div id="api14ExamplesTable" class="table"></div>
     </section>
 
     <section id="native">
@@ -86,6 +91,9 @@
         <div class="setting-row"><div><strong>Select</strong><span>有限枚举选项</span></div><select><option>每次操作一次</option><option>每个结果一次</option></select></div>
         <div class="setting-row"><div><strong>Audio</strong><span>由用户选择本地音频</span></div><div class="inline"><button class="button secondary">选择音频</button><button class="button subtle">试听</button></div></div>
         <div class="setting-row"><div><strong>Animation Select</strong><span>选择插件为宿主目标贡献的动画</span></div><select><option>棱镜弹跳</option><option>使用宿主默认</option></select></div>
+        <div class="setting-row"><div><strong>Component Style Select</strong><span>选择受限组件样式包</span></div><select><option>专注模式</option><option>使用宿主默认</option></select></div>
+        <div class="setting-row"><div><strong>Component Override</strong><span>选择或切换 optional 组件覆盖包</span></div><label class="toggle"><input type="checkbox"><i></i></label></div>
+        <div class="setting-row"><div><strong>Result Presentation</strong><span>选择宿主绑定 DrawReceipt 的结果布局</span></div><select><option>聚光结果</option><option>易读列表</option></select></div>
       </div>
     </section>
 
@@ -100,7 +108,7 @@
   "order": 720,
   "entry": "pages/draw-studio.html"
 }</code></pre>
-        <div class="feature-list"><h3>适合什么</h3><p>教室座位表、全新点名玩法、课堂工具、可视化面板或其他页面级功能。</p><h3>如何调用宿主</h3><p>页面使用 <code>window.CyrenePlugin.request(method, args)</code>。API 1.3 的 RPC 由宿主绑定到当前页面 Principal 和 MessagePort。</p><h3>如何保持一致</h3><p>设置优先使用原生 schema；大型 HTML 页面参考本页 Fluent tokens，并为窄屏与深色模式设计。</p></div>
+        <div class="feature-list"><h3>适合什么</h3><p>教室座位表、全新点名玩法、课堂工具、可视化面板或其他页面级功能。</p><h3>如何调用宿主</h3><p>页面使用 <code>window.CyrenePlugin.request(method, args)</code>。API 1.4 的 RPC 由宿主绑定到当前页面 Principal 和 MessagePort。</p><h3>如何保持一致</h3><p>设置优先使用原生 schema；大型 HTML 页面参考本页 Fluent tokens，并为窄屏与深色模式设计。</p></div>
       </div>
     </section>
 
@@ -170,7 +178,7 @@
   "publisherKey": "base64-spki"
 }</code></pre><div class="checklist"><h3>发布检查</h3><label>✓ Tag 使用 v1.2.3</label><label>✓ Release 非 draft / prerelease</label><label>✓ 仅一个资源匹配 assetPattern</label><label>✓ 包内版本与 tag 一致</label><label>✓ 发布者私钥不进入仓库</label></div></div></section>
 
-    <footer>CyreneNameRoller Plugin API 1.3.0 · 2026</footer>
+    <footer>CyreneNameRoller Plugin API 1.4.0 · 2026</footer>
   </main>
 
   <div id="toast" class="toast" role="status"><strong>Fluent 通知</strong><span>这是一条页面内通知。</span></div>

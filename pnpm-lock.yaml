@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@starcyrene/cyrene-name-roller':
-        specifier: file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz
-        version: file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz
+        specifier: file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz
+        version: file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz
 
 packages:
 
@@ -200,9 +200,9 @@ packages:
     resolution: {integrity: sha512-CZFX7UZVN9VopGbjTx4UXaXsi9ewoM1buL0kY7j1ftYdSs7p2spv9opxFjHlQ/QGTgh4UqufYqJJ0WKLml7b6w==}
     engines: {node: '>=4.0'}
 
-  '@starcyrene/cyrene-name-roller@file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz':
-    resolution: {integrity: sha512-52JmeSFtXBHRk04MOX4bvikaNuzlTwOhHE/FxGvD9feOgJnlOUQdXPZEgMqd0i5UIkpYE3Ns7BzRVuLT6bFw8g==, tarball: file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz}
-    version: 1.3.0
+  '@starcyrene/cyrene-name-roller@file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz':
+    resolution: {integrity: sha512-mEmjAnzg+eT+pXJNJT9RfncR3nGn7LLq1JGvSzdNqhsvDlC+JULiFbYGRMmHChs/4BuGp2+nHE7NUGmeZCfSFQ==, tarball: file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz}
+    version: 1.4.0
     engines: {node: '>=20'}
     hasBin: true
 
@@ -820,7 +820,7 @@ snapshots:
 
   '@javascript-obfuscator/estraverse@5.4.0': {}
 
-  '@starcyrene/cyrene-name-roller@file:vendor/cyrene-name-roller-plugin-sdk-1.3.0.tgz':
+  '@starcyrene/cyrene-name-roller@file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz':
     dependencies:
       esbuild: 0.25.12
       javascript-obfuscator: 5.5.0

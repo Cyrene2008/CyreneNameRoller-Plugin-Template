@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "cn.example.cyrene.plugin",
   "name": "Cyrene Plugin Template",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "author": "Your Name",
-  "description": "A first-party-style CyreneNameRoller plugin template.",
-  "engine": { "min": "1.3.0", "max": "1.3.0" },
+  "description": "A first-party-style CyreneNameRoller Plugin API 1.4 template.",
+  "engine": { "min": "1.4.0", "max": "1.4.0" },
   "entry": "src/worker.js",
   "icon": "assets/icon.svg",
   "readme": "README.md",
@@ -43,7 +43,11 @@
             { "id": "mode", "type": "select", "path": "mode", "label": "工作模式", "description": "下拉选择控件示例。", "default": "summary", "options": [{ "value": "summary", "label": "每次抽取一次" }, { "value": "each", "label": "每个结果一次" }] },
             { "id": "sound", "type": "audio", "path": "sound", "label": "结果音效", "description": "支持常见本地音频格式。", "accept": "audio/*,.mp3,.m4a,.wav,.flac,.ogg", "default": null },
             { "id": "roller-motion", "type": "animation-select", "target": "roller.finish", "packId": "template-motion", "label": "点名结果动画", "description": "由宿主渲染动画选择器，并安全应用本插件的动画预设。" },
-            { "id": "page-motion", "type": "animation-select", "target": "page.transition", "packId": "template-motion", "label": "页面切换动画", "description": "切换插件贡献的页面过渡效果。" }
+            { "id": "page-motion", "type": "animation-select", "target": "page.transition", "packId": "template-motion", "label": "页面切换动画", "description": "切换插件贡献的页面过渡效果。" },
+            { "id": "result-style", "type": "component-style-select", "target": "roller.result", "label": "点名结果样式", "description": "选择本插件为宿主权威结果提供的受限样式包。" },
+            { "id": "filter-layout", "type": "component-override-select", "target": "roller.filters", "label": "筛选器布局", "description": "选择隐藏、紧凑或宿主默认的筛选器布局。" },
+            { "id": "hide-statistics", "type": "component-override-toggle", "target": "statistics.summary", "packId": "minimal-statistics", "label": "隐藏统计摘要", "description": "用二元开关应用或撤销指定覆盖包。" },
+            { "id": "result-layout", "type": "result-presentation-select", "target": "roller.result", "label": "点名结果布局", "description": "选择由宿主绑定 DrawReceipt 的权威结果布局。" }
           ]
         }
       },

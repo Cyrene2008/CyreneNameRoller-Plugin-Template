@@ -41,7 +41,7 @@ const rpc = [
   ['system.execute', 'system:execute', '执行清单中固定声明的桌面系统操作。'],
   ['dependency.storage.read', '依赖 dataAccess', '通过 readDependencyStorage() 读取前置插件明确共享的数据。'],
   ['componentStylePacks', 'ui:component-styles', '按稳定组件 ID 声明受限大小、颜色、字号、字重、间距与宿主字体别名。'],
-  ['componentOverridePacks', 'ui:component-overrides', '仅隐藏或压缩宿主允许的 optional 目标；覆盖包原子应用。'],
+  ['componentOverridePacks', 'ui:component-overrides', '隐藏或压缩宿主允许的 optional 目标；API 1.4 新增六个细粒度筛选器目标。'],
   ['nativeViews', 'ui:native-views', '在三个固定 slot: 插槽中渲染宿主校验的声明式 Schema。'],
   ['resultPresentations', 'ui:result-presentations', '只声明权威结果布局；姓名、结果与 Receipt 由宿主注入。']
 ]
@@ -55,7 +55,8 @@ const platforms = [
   ['system.execute', '安全跳过', 'Tauri ✓（固定清单操作）']
 ]
 
-const api13Examples = [
+const api14Examples = [
+  ['Native contribution selectors', 'manifest.json', '组件样式、覆盖包、二元覆盖和权威结果布局选择器。'],
   ['componentStylePacks', 'manifest.json', '3 个样式包，覆盖 11 个稳定组件目标。'],
   ['componentOverridePacks', 'manifest.json', 'collapse、compact、reserve 三种 optional 布局语义。'],
   ['slot:roller.side-panel', 'views/roller-stats.json', '统计资源绑定、Progress 与宿主权威点名命令。'],
@@ -73,7 +74,7 @@ function table(target, headings, rows) {
 table('eventsTable', ['事件', '权限', '说明'], events)
 table('rpcTable', ['RPC', '权限', '说明'], rpc)
 table('platformTable', ['能力', 'Web', 'Tauri'], platforms)
-table('api13ExamplesTable', ['贡献或插槽', '示例文件', '示范内容'], api13Examples)
+table('api14ExamplesTable', ['贡献或插槽', '示例文件', '示范内容'], api14Examples)
 
 const root = document.documentElement
 const savedTheme = localStorage.getItem('cyrene-docs-theme')
