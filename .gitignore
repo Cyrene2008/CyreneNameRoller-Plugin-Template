@@ -4,3 +4,4 @@ dist/
 *.key
 .DS_Store
 
+/.bun-tmp

@@ -1,8 +1,9 @@
-import { definePlugin, PluginEvents } from '@cyrene2008/cyrene-name-roller/plugin-sdk'
+import { definePlugin, describeHost, executeDraw, PluginEvents, queryResource } from '@starcyrene/cyrene-name-roller/plugin-sdk'
 
 const DEFAULTS = { enabled: true, volume: 0.7, mode: 'summary', sound: null }
 let request
 let platform
+let pluginContext
 
 async function settings() {
   return { ...DEFAULTS, ...((await request('storage.read', { key: 'settings' })) || {}) }
@@ -10,6 +11,7 @@ async function settings() {
 
 definePlugin({
   async activate(context) {
+    pluginContext = context
     request = context.request
     platform = context.platform
     const host = await describeHost(context)
@@ -48,7 +50,16 @@ definePlugin({
     })
   },
 
+  async onCommand(commandId) {
+    if (commandId === 'refresh') return { handled: true, settings: await settings() }
+    if (commandId === 'draw-one') return executeDraw(pluginContext, { count: 1 })
+    if (commandId === 'show-statistics') return queryResource(pluginContext, 'statistics')
+    if (commandId === 'describe-host') return describeHost(pluginContext)
+    return { handled: false }
+  },
+
   async deactivate() {
+    pluginContext = null
     request = null
     platform = null
   }

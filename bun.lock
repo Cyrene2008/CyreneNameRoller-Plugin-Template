@@ -5,13 +5,11 @@
     "": {
       "name": "cyrene-name-roller-plugin-template",
       "devDependencies": {
-        "@cyrene2008/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.2.0.tgz",
+        "@starcyrene/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz",
       },
     },
   },
   "packages": {
-    "@cyrene2008/cyrene-name-roller": ["@cyrene2008/cyrene-name-roller@vendor/cyrene-name-roller-plugin-sdk-1.2.0.tgz", { "dependencies": { "esbuild": "^0.25.12", "javascript-obfuscator": "^5.5.0", "jszip": "^3.10.1" }, "bin": { "cnrp": "./bin/cnrp.mjs" } }, "sha512-OTObG8cUWcYrttlpomrJCoi4kI5o45ckN3ega3dLMQi8ztcJ9RNYZ53Gr2l5tsEJ2qRf5/56jgDQHl5csLvDJw=="],
-
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.12", "", { "os": "aix", "cpu": "ppc64" }, "sha512-Hhmwd6CInZ3dwpuGTF8fJG6yoWmsToE+vYgD4nytZVxcu1ulHpUQRAB1UJ8+N1Am3Mz4+xOByoQoSZf4D+CpkA=="],
 
     "@esbuild/android-arm": ["@esbuild/android-arm@0.25.12", "", { "os": "android", "cpu": "arm" }, "sha512-VJ+sKvNA/GE7Ccacc9Cha7bpS8nyzVv0jdVgwNDaR4gDMC/2TTRc33Ip8qrNYUcpkOHUT5OZ0bUcNNVZQ9RLlg=="],
@@ -79,6 +77,8 @@
     "@javascript-obfuscator/escodegen": ["@javascript-obfuscator/escodegen@2.4.2", "", { "dependencies": { "@javascript-obfuscator/estraverse": "^5.3.0", "esprima": "^4.0.1", "esutils": "^2.0.2", "optionator": "^0.8.1" }, "optionalDependencies": { "source-map": "~0.6.1" } }, "sha512-3N7EUdYxuldwvtOtZIlAxNwPW1qTUFwWt3PxNkik6hB1uSSXLXj9JMlSyUbTCXK3Osjn0Nu0s/aa4mbvkGouXQ=="],
 
     "@javascript-obfuscator/estraverse": ["@javascript-obfuscator/estraverse@5.4.0", "", {}, "sha512-CZFX7UZVN9VopGbjTx4UXaXsi9ewoM1buL0kY7j1ftYdSs7p2spv9opxFjHlQ/QGTgh4UqufYqJJ0WKLml7b6w=="],
+
+    "@starcyrene/cyrene-name-roller": ["@starcyrene/cyrene-name-roller@vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz", { "dependencies": { "esbuild": "^0.25.12", "javascript-obfuscator": "^5.5.0", "jszip": "^3.10.1" }, "bin": { "cnrp": "bin/cnrp.mjs" } }, "sha512-mEmjAnzg+eT+pXJNJT9RfncR3nGn7LLq1JGvSzdNqhsvDlC+JULiFbYGRMmHChs/4BuGp2+nHE7NUGmeZCfSFQ=="],
 
     "@types/minimatch": ["@types/minimatch@3.0.5", "", {}, "sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ=="],
 

@@ -1,23 +1,25 @@
 # CyreneNameRoller Plugin Template
 
-CyreneNameRoller Plugin API 1.2 官方模板。点击 GitHub 的 **Use this template** 创建仓库，即可开发同时适配 Web 与 Tauri 的 `.cnrp` 插件。
+CyreneNameRoller Plugin API 1.4 官方模板。点击 GitHub 的 **Use this template** 创建仓库，即可开发同时适配 Web 与 Tauri 的 `.cnrp` 插件。
 
-本模板不只是一个“设置页插件”：
+本模板覆盖：
 
-- `manifest.json` 声明宿主原生 Fluent 设置页、Dock 一级页面、动画包和背景视觉层。
-- `pages/draw-studio.*` 展示页面级大型功能，并通过 `draw.execute` 使用宿主 CAF、统计与记录事务。
-- `src/worker.js` 展示插件生命周期、只读事件、插件私有存储、音频和页面内通知。
-- `animations/template-motion.json` 覆盖页面切换、点名、发牌、翻牌、抽奖与全局动画目标。
-- `src/visual.js` 展示独立 OffscreenCanvas Worker、主题/尺寸生命周期和结果粒子反馈。
-- `contributes.commands` 与 `onCommand()` 展示插件自有命令如何由宿主安全调用。
-- GitHub Actions 自动校验、打包 Release 和部署 Pages API/Fluent 图鉴。
+- 宿主原生 Fluent 设置页与 Dock 一级页面。
+- API 1.4 组件样式、覆盖包、二元覆盖和权威结果布局选择器。
+- 通过宿主权威事务完成点名、统计和记录提交。
+- 覆盖导航、点名、卡牌、抽奖和统计目标的受限组件样式。
+- `roller.filters` 等 optional 组件的隐藏、压缩和占位布局。
+- 三个固定插槽的声明式原生视图。
+- 由宿主绑定 `DrawReceipt` 的四种权威结果布局。
+- 插件 Worker、命令、动画包和隔离的 Canvas/WebGL 视觉层。
+- GitHub Actions 自动校验、打包 Release 和部署开发文档。
 
 ## 使用模板
 
 1. 使用本仓库创建新仓库。
 2. 修改 `manifest.json` 中的反向域名 ID、名称、开发者和版本。
 3. 删除不需要的贡献项与权限，只保留实际使用的能力。
-4. 安装 SDK 并校验：
+4. 安装 SDK、校验并打包：
 
 ```bash
 bun install
@@ -25,46 +27,71 @@ bun run validate
 bun run build
 ```
 
-生成的插件位于 `dist/cyrene-plugin-template.cnrp`。本地调试时可在 CyreneNameRoller 的插件页面导入 `.cnrp`。
+生成的插件位于 `dist/cyrene-plugin-template.cnrp`，可在 CyreneNameRoller 的插件页面导入。
 
-## API 1.2 示例地图
+## API 1.4 示例地图
 
 | 目标 | 示例文件 | 关键能力 |
 | --- | --- | --- |
-| 宿主原生配置 | `manifest.json` | `native.settings`、`animation-select` |
+| 宿主原生配置 | `manifest.json` | `native.settings`、动画与 API 1.4 UI 贡献选择器 |
 | Dock 大型页面 | `pages/draw-studio.*` | `location: "dock"`、`window.CyrenePlugin.request()` |
-| 新点名玩法 | `pages/draw-studio.js` | `draw.execute`，宿主生成并提交结果 |
-| 事件与轻量后台逻辑 | `src/worker.js` | `events:draw`、`events:lifecycle` |
-| 前置插件共享数据 | SDK `readDependencyStorage()` | 依赖声明 `dataAccess` 与目标插件 `shareData` |
-| 动画扩展 | `animations/template-motion.json` | 受校验的 WAAPI 关键帧 |
-| Canvas/WebGL 表现层 | `src/visual.js` | `defineVisualSurface()`、OffscreenCanvas |
-| 插件自有命令 | `manifest.json` / `src/worker.js` | `contributes.commands`、`onCommand()` |
+| 权威抽签事务 | `pages/draw-studio.js` | `draw.execute`，宿主生成并提交结果 |
+| 稳定组件样式 | `manifest.json` | 3 个 `componentStylePacks`、11 个目标、宿主字体别名 |
+| 可选组件覆盖 | `manifest.json` | `collapse`、`compact`、`reserve` 三种布局语义 |
+| 点名侧栏 | `views/roller-stats.json` | 统计绑定、进度条、宿主权威点名命令 |
+| 结果下方 | `views/below-result.json` | 宿主主题绑定、能力发现命令 |
+| 记录工具栏 | `views/records-toolbar.json` | 语义图标、只读统计命令 |
+| 权威结果呈现 | `manifest.json` | `single`、`list`、`grid`、`spotlight` |
+| 事件与后台逻辑 | `src/worker.js` | 生命周期、存储、资源查询、能力发现和权威事务 |
+| 动画与视觉层 | `animations/`、`src/visual.js` | 受限动画、OffscreenCanvas |
 
-HTML 页面适合大型交互，但它运行在受控页面环境中，不能直接访问宿主 DOM。普通设置优先使用宿主原生 schema，能够自动继承桃粉、Fluent、自定义主题以及深浅模式。
+HTML 页面运行在受控 iframe 中，不能访问宿主 DOM。API 1.4 页面仍使用稳定的 `window.CyrenePlugin.request(method, args)`；宿主在内部用绑定当前页面 Principal 的 `MessageChannel` 传输 RPC。API 1.2 页面保留旧的 `window.message + event.source` 兼容路径，无需重新打包。
 
-### 主题与视觉性能合约
+## 受限 UI 定制
 
-视觉表面可订阅 `app:theme-changed`。宿主会缓存最新状态，并在视觉 Worker 完成 `activate(context)` 和初始 `onResize(viewport)` 后回放：
+样式只能指向宿主公布的稳定组件 ID。模板中的 `focused`、`compact-navigation` 和 `cards-and-statistics` 示例覆盖导航、当前名单、筛选器、主要操作、权威结果、卡牌、抽奖和统计，只使用允许的大小、颜色、字号、字重、间距、圆角和宿主字体别名。完全锁定的 `navigation.settings-entry` 没有样式示例。任意 CSS 选择器、CSS 文件、`url()`、`var()`、`display`、定位、`z-index` 和 `pointer-events` 都会被拒绝。
 
-```js
-{
-  theme: 'peach' | 'fluent' | 'custom',
-  dark: boolean,
-  accent: '#RRGGBB',
-  perfAnimations: boolean,
-  reducedMotion: boolean
-}
-```
+`focus-mode`、`compact-filters` 和 `minimal-statistics` 分别展示 optional 组件的 `collapse`、`compact` 和 `reserve` 布局语义。`roller.filters` 隐藏后宿主仍沿用当前或默认点名范围。权威结果、名单身份、错误、完整性状态和恢复入口不能隐藏；失败的覆盖包会整体拒绝，不会部分生效。
 
-Canvas/WebGL 插件必须同时尊重 `perfAnimations === false` 和 `reducedMotion === true`：停止计时器或动画帧、清空动态画布，并在两者恢复后只启动一个渲染循环。不要仅跳过绘制却继续以高频率调度空帧。`src/visual.js` 展示了完整的暂停、清理和单循环恢复模式。
+API 1.4 的原生设置页可用 `component-style-select`、`component-override-select`、`component-override-toggle` 和 `result-presentation-select` 让用户切换声明式贡献。宿主还公布 `roller.filter.english-mode`、`roller.filter.draw-target`、`roller.filter.gender`、`roller.filter.draw-count`、`roller.filter.duplicates` 和 `roller.filter.count` 六个细粒度、仅允许 `collapse` 的筛选器目标。
+
+原生视图只能使用固定 Schema、宿主语义图标和以下插槽：
+
+- `slot:roller.side-panel`
+- `slot:roller.below-result`
+- `slot:records.toolbar`
+
+未知插槽报告 `available: false`。通用原生视图会显示不可移除的插件来源标识，不能伪装成宿主结果、错误或完整性状态。
+
+`VerifiedResult` 不是通用视图节点。插件只能声明结果布局，姓名、结果数组和当前 `DrawReceipt` 由宿主在结果上下文中注入；保存失败时宿主不会显示已成功提交的权威状态。
+
+`src/worker.js` 还提供四个命令示例：`refresh` 读取插件私有设置，`draw-one` 通过 `executeDraw()` 发起宿主权威事务，`show-statistics` 通过 `queryResource()` 读取只读快照，`describe-host` 发现当前宿主资源和事务。原生视图按钮只会调用这些已声明命令，不会获得 Core Worker、内部请求 ID 或宿主对象。
+
+## 公平与安全边界
+
+插件可以提交 `listId`、目标、性别、数量和是否允许重复等筛选条件，但不能指定赢家、结果数组、候选权重、统计增量、记录正文或算法参数。
+
+- Web 由 Core Worker 持有算法、事务队列、统计/记录提交和 Receipt 生成。
+- Tauri 由 Rust 权威事务校验输入、执行抽签并保护完整核心状态。
+- 插件存储只能写插件自己的命名空间，不能写核心名单、统计、记录或权威结果。
+- Worker、页面、视觉层、命令和原生视图拥有独立 Principal；禁用、崩溃或卸载后立即撤销。
+- 插件不会获得 Core Worker、内部请求 ID、Tauri grantToken 或宿主对象引用。
+
+安全模式只能通过宿主的 `safemode.json` 配置生效：Tauri 修改后重启，Web 修改部署文件后重新加载。安全模式不加载任何插件包、Worker、iframe、命令、字体、动画、视觉层、UI 贡献或在线目录，但核心点名、记录、统计和导出仍可使用。插件不能自行关闭或绕过安全模式。
+
+## Web 与 Tauri
+
+先读取 `context.platform` / `context.capabilities`，再决定使用宿主桥接还是 Web fallback。不可用的可选系统能力返回结构化 `UNSUPPORTED_PLATFORM`，插件应安全跳过或显示平台专属 UI，不应直接调用 PowerShell、CMD、Tauri API 或宿主内部模块。
+
+视觉表面必须在 `perfAnimations === false` 或 `reducedMotion === true` 时停止计时器/动画帧并清空非必要动态画布，恢复后只启动一个渲染循环。`src/visual.js` 展示了完整生命周期。
 
 ## SDK 版本
 
-模板在 `vendor/` 中携带官方 `@cyrene2008/cyrene-name-roller@1.2.0` SDK `.tgz`，因此克隆后无需 registry Token 即可安装。升级 SDK 时，用新版官方包替换该文件，并同步更新 `package.json`、锁文件与 `manifest.json` 的 `engine`。
+模板在 `vendor/` 中携带已验证的 `@starcyrene/cyrene-name-roller@1.4.0` SDK 包，因此克隆后无需 registry Token 即可安装。升级 SDK 时，应同步替换 vendor 包并更新 `package.json`、`bun.lock` 与 `manifest.json` 的 `engine`。
 
 ## 发布插件
 
-推送 `v1.2.3` 格式的 tag，Release 工作流会生成 `.cnrp` 并上传。插件目录只需登记仓库和资源匹配规则：
+推送 `v1.2.3` 格式的 tag，Release 工作流会用 Bun 校验、生成 `.cnrp` 并上传。插件目录只需登记仓库和资源匹配规则：
 
 ```json
 {
@@ -77,24 +104,4 @@ Canvas/WebGL 插件必须同时尊重 `perfAnimations === false` 和 `reducedMot
 }
 ```
 
-宿主会通过 GitHub API 自动获得最新正式版、下载地址和 Release asset SHA-256。
-
-## 公平与安全边界
-
-插件的创作自由主要存在于页面、交互、动画、音频、Canvas/WebGL 表现和新玩法流程；核心抽取结果仍由宿主掌握。
-
-API 1.2 使用通用宿主扩展模型：先用 `describeHost()` 发现资源、事务和扩展点，再用 `queryResource()` 读取只读资源、用 `executeTransaction()` 提交宿主管理事务。插件可以自由组合这些能力，而不必等待宿主为每一种玩法增加专用 RPC；既有记录、统计、CAF 参数和抽取结果仍不可伪造或改写。
-
-- 插件可以读取名单、既有记录、统计和公开平衡状态的快照（需相应权限）。
-- 插件可以调用 `draw.execute` 提交名单、目标、性别、数量和是否允许重复等筛选条件。
-- 宿主使用 CAF/核心算法生成结果，并在同一事务中增加统计、追加带 `pluginId`/`operationId` 的记录。
-- 插件不能指定赢家、候选权重或记录正文，也不能修改/删除既有记录、统计与 CAF 参数。
-- `storage.write` 只写插件自己的命名空间，不是宿主核心数据写入口。
-
-这条边界允许开发者制作完整的新页面与点名玩法，同时避免插件破坏公平或伪造历史。
-
-## Web 与 Tauri
-
-先读取 `context.platform` / `context.capabilities`，再决定使用宿主桥接还是 Web fallback。不可用的可选系统能力会返回结构化 `UNSUPPORTED_PLATFORM`，插件应安全跳过或显示平台专属 UI，不应直接调用 PowerShell、CMD、Tauri API 或宿主内部模块。
-
-完整参考请访问 [GitHub Pages：API 1.2、Fluent 组件画廊与扩展点文档](http://cnrp-template.cyrene.hk)。
+宿主会通过 GitHub API 获取最新正式版、下载地址和 Release asset SHA-256。完整参考见 [GitHub Pages：API 1.4、Fluent 组件画廊与安全边界](http://cnrp-template.cyrene.hk)。
