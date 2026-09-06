@@ -5,7 +5,7 @@
     "": {
       "name": "cyrene-name-roller-plugin-template",
       "devDependencies": {
-        "@starcyrene/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz",
+        "@starcyrene/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.5.0.tgz",
       },
     },
   },
@@ -78,7 +78,7 @@
 
     "@javascript-obfuscator/estraverse": ["@javascript-obfuscator/estraverse@5.4.0", "", {}, "sha512-CZFX7UZVN9VopGbjTx4UXaXsi9ewoM1buL0kY7j1ftYdSs7p2spv9opxFjHlQ/QGTgh4UqufYqJJ0WKLml7b6w=="],
 
-    "@starcyrene/cyrene-name-roller": ["@starcyrene/cyrene-name-roller@vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz", { "dependencies": { "esbuild": "^0.25.12", "javascript-obfuscator": "^5.5.0", "jszip": "^3.10.1" }, "bin": { "cnrp": "bin/cnrp.mjs" } }, "sha512-mEmjAnzg+eT+pXJNJT9RfncR3nGn7LLq1JGvSzdNqhsvDlC+JULiFbYGRMmHChs/4BuGp2+nHE7NUGmeZCfSFQ=="],
+    "@starcyrene/cyrene-name-roller": ["@starcyrene/cyrene-name-roller@vendor/cyrene-name-roller-plugin-sdk-1.5.0.tgz", { "dependencies": { "esbuild": "^0.25.12", "javascript-obfuscator": "^5.5.0", "jszip": "^3.10.1" }, "bin": { "cnrp": "bin/cnrp.mjs" } }, "sha512-tcp0xf2gOUhr4zs9JpbRK5VDm+naXA7Uue2Q9/xdTJcInO0ci10d/ybuHC7Lux+o6dVKxCLp2yY52/zdDf0jsQ=="],
 
     "@types/minimatch": ["@types/minimatch@3.0.5", "", {}, "sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ=="],
 

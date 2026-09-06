@@ -1,0 +1,26 @@
+name: Validate and release API 1.5 plugin SDK
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['plugin-sdk-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: npm run validate
+      - run: npm run build
+      - name: Publish tagged package
+        if: startsWith(github.ref, 'refs/tags/plugin-sdk-v')
+        run: gh release create "$GITHUB_REF_NAME" dist/*.cnrp --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

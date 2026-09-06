@@ -1,5 +1,8 @@
 # CyreneNameRoller Plugin Template
 
+This repository targets Plugin API 1.5.0. API 1.4 manifests and helpers are
+migration-only and cannot be published by the bundled `cnrp` CLI.
+
 CyreneNameRoller Plugin API 1.4 官方模板。点击 GitHub 的 **Use this template** 创建仓库，即可开发同时适配 Web 与 Tauri 的 `.cnrp` 插件。
 
 本模板覆盖：
@@ -29,7 +32,7 @@ bun run build
 
 生成的插件位于 `dist/cyrene-plugin-template.cnrp`，可在 CyreneNameRoller 的插件页面导入。
 
-## API 1.4 示例地图
+## API 1.5 示例地图
 
 | 目标 | 示例文件 | 关键能力 |
 | --- | --- | --- |
@@ -87,7 +90,7 @@ API 1.4 的原生设置页可用 `component-style-select`、`component-override-
 
 ## SDK 版本
 
-模板在 `vendor/` 中携带已验证的 `@starcyrene/cyrene-name-roller@1.4.0` SDK 包，因此克隆后无需 registry Token 即可安装。升级 SDK 时，应同步替换 vendor 包并更新 `package.json`、`bun.lock` 与 `manifest.json` 的 `engine`。
+模板在 `vendor/` 中携带已验证的 `@starcyrene/cyrene-name-roller@1.5.0` SDK 包，因此克隆后无需 registry Token 即可安装。API 1.5 manifests use `api: "1.5"`, a `cnrp-runner` entry, explicit permissions, file scopes, capabilities, hooks and optional signatures.
 
 ## 发布插件
 
