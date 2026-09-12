@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>API 1.5 后端接口契约 · CyreneNameRoller</title>
+  <link rel="stylesheet" href="styles.css?v=1.5.0">
+</head>
+<body>
+  <aside class="nav">
+    <a class="brand" href="index.html"><span class="brand-icon">C</span><span>Backend Contract<small>Plugin API 1.5.0</small></span></a>
+    <nav>
+      <a href="#overview">概览</a>
+      <a href="#layers">契约分层</a>
+      <a href="#envelope">RPC Envelope</a>
+      <a href="#lifecycle">生命周期</a>
+      <a href="#rpc">公开 RPC</a>
+      <a href="#state">状态与 DOM</a>
+      <a href="#core">Core 与 Hooks</a>
+      <a href="#errors">错误与限制</a>
+      <a href="#internal">内部接口</a>
+    </nav>
+    <a class="button subtle" href="index.html">返回开发中心</a>
+  </aside>
+
+  <main>
+    <section id="overview" class="hero">
+      <div>
+        <span class="eyebrow">Backend Contract · API 1.5.0</span>
+        <h1>插件后端接口契约</h1>
+        <p>这份页面定义 SDK、JSON-RPC、Core Worker 与 Tauri native bridge 的边界。插件只依赖公开 SDK；后端负责权限、资源所有权、核心状态和清理。</p>
+        <div class="actions">
+          <a class="button primary" href="plugin-development.md">开发指南</a>
+          <a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">宿主源码</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="code-title"><span></span><span></span><span></span>request.json</div>
+        <pre><code>{
+  "jsonrpc": "2.0",
+  "protocol": "cnrp-jsonrpc/1",
+  "api": "1.5",
+  "kind": "request",
+  "id": "req-random-id",
+  "pluginId": "cn.example.plugin",
+  "instanceId": "instance-id",
+  "idempotencyKey": "operation-id",
+  "method": "core.operations.execute",
+  "params": {}
+}</code></pre>
+      </div>
+    </section>
+
+    <section id="layers">
+      <header><span class="eyebrow">Four boundaries</span><h2>谁可以调用什么</h2><p>公开 SDK 与内部实现严格分开。native command 名称出现在源码中，不代表插件可以直接调用。</p></header>
+      <div class="grid">
+        <article class="card"><h3>SDK groups</h3><code>public</code><p>Worker 和声明过的插件页面使用的稳定 API。方法自动生成 RPC envelope，并处理结构化错误。</p></article>
+        <article class="card"><h3>JSON-RPC</h3><code>cnrp-jsonrpc/1</code><p>Host 与 bundled runner/Worker 的版本化 transport。插件不应手写 envelope。</p></article>
+        <article class="card"><h3>Core Worker</h3><code>internal</code><p>只由宿主 CoreClient 使用。随机状态、候选集、记录和提交 envelope 不对插件开放。</p></article>
+        <article class="card"><h3>Tauri commands</h3><code>internal</code><p>文件、网络、runner 和 Rust core 的 native bridge。必须由宿主带入 session identity 和 grants。</p></article>
+      </div>
+    </section>
+
+    <section id="envelope">
+      <header><span class="eyebrow">Transport</span><h2>统一 RPC Envelope</h2><p>每个 request、response、event、cancel、heartbeat 和 shutdown 都携带协议与协商后的 API 版本。</p></header>
+      <div class="two-column">
+        <pre><code>{
+  "jsonrpc": "2.0",
+  "protocol": "cnrp-jsonrpc/1",
+  "api": "1.5",
+  "kind": "request",
+  "id": "req-random-id",
+  "pluginId": "cn.example.plugin",
+  "instanceId": "instance-id",
+  "idempotencyKey": "operation-id",
+  "method": "net.request",
+  "params": {}
+}</code></pre>
+        <div class="feature-list">
+          <h3>Frame limits</h3><p>桌面 transport 使用 4-byte little-endian length + UTF-8 JSON，单 frame 最大 1 MiB。</p>
+          <h3>Binary limits</h3><p>二进制只能使用 base64 chunks，每块最大 256 KiB，每个操作最大 32 MiB。</p>
+          <h3>Identity</h3><p><code>pluginId</code>、<code>instanceId</code> 和 idempotency key 会在每条消息中校验。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="lifecycle">
+      <header><span class="eyebrow">Authenticated lifecycle</span><h2>Runner / Worker 生命周期</h2><p>凭据不进入 argv 或公开环境变量；host 只向插件发送规范化 metadata 与已授予 capability。</p></header>
+      <div class="flow-grid">
+        <article class="flow-step"><b>1</b><strong>hello</strong><span>Host 宣布 protocol、API、plugin 和 instance identity。</span></article>
+        <article class="flow-step"><b>2</b><strong>hello.accepted</strong><span>Runner 返回协商结果和 credential proof。</span></article>
+        <article class="flow-step"><b>3</b><strong>initialize</strong><span>Host 发送 resolved capabilities，不发送 host secrets。</span></article>
+        <article class="flow-step"><b>4</b><strong>ready</strong><span>Plugin runtime 完成初始化，开始受限 request/event 流量。</span></article>
+      </div>
+    </section>
+
+    <section id="rpc">
+      <header><span class="eyebrow">SDK to host</span><h2>公开 RPC 映射</h2><p>下面是插件作者可依赖的 backend surface。权限检查、平台检查和资源所有权由 host 执行。</p></header>
+      <div class="table">
+        <div class="table-row head"><strong>SDK / request</strong><strong>RPC method</strong><strong>Permission / platform</strong></div>
+        <div class="table-row"><code>getPlatform()</code><strong>runtime.platform</strong><span>无权限 · Web / Tauri</span></div>
+        <div class="table-row"><code>getCapabilities()</code><strong>runtime.capabilities</strong><span>无权限 · Web / Tauri</span></div>
+        <div class="table-row"><code>groups.page.read()</code><strong>page.read</strong><span>page:read · Web / Tauri</span></div>
+        <div class="table-row"><code>groups.page.write()</code><strong>page.write</strong><span>page:write · Web / Tauri</span></div>
+        <div class="table-row"><code>groups.window.create()</code><strong>window.create</strong><span>window:create · Tauri</span></div>
+        <div class="table-row"><code>groups.files.read/write()</code><strong>files.read / files.write</strong><span>files scopes · Tauri</span></div>
+        <div class="table-row"><code>groups.net.request()</code><strong>net.request</strong><span>net:internet · Tauri；Web fail-closed</span></div>
+        <div class="table-row"><code>groups.state.read/write()</code><strong>page.read / page.write</strong><span>page permissions · Web / Tauri</span></div>
+        <div class="table-row"><code>groups.dom.*()</code><strong>dom.query/read/write/insert</strong><span>dom:main/settings · Web / Tauri</span></div>
+        <div class="table-row"><code>groups.core.*.read()</code><strong>core.names.read / records / statistics / balance</strong><span>core read grants · Web / Tauri</span></div>
+        <div class="table-row"><code>groups.core.operations.execute()</code><strong>core.operations.execute</strong><span>operation grant · Web / Tauri</span></div>
+        <div class="table-row"><code>context.request('system.*')</code><strong>system.open-url/select-file/...</strong><span>system capability · platform-dependent</span></div>
+      </div>
+    </section>
+
+    <section id="state">
+      <header><span class="eyebrow">Host-owned state</span><h2>Page、Window、DOM 和文件边界</h2><p>插件收到 opaque IDs 和 bounded snapshots，不收到 native handles 或 host object references。</p></header>
+      <div class="boundary-grid">
+        <article><h3>Page state</h3><p>普通字段：<code>language</code>、<code>theme</code>、<code>animation</code>、<code>display</code> 和 <code>roller.filters.*</code>。敏感字段需要 <code>page:write-sensitive</code> 与 exact-patch confirmation。</p></article>
+        <article><h3>Controlled DOM</h3><p>只允许 <code>query/read/write/insert</code>。拒绝 <code>dom.execute</code>、raw HTML、script URL、inline handler、function source 和跨插件 node ID。</p></article>
+        <article><h3>Resource quotas</h3><p>每插件默认 4 windows、16 pages、32 styles、32 concurrent RPC。禁用、崩溃、unload 和 safe mode 会清理所有 handles。</p></article>
+        <article><h3>File / network</h3><p>路径必须位于 host-owned staged root 或声明的 external root。网络仅允许 HTTP/HTTPS，并执行 DNS、私网、redirect、size、timeout 和 concurrency 检查。</p></article>
+      </div>
+    </section>
+
+    <section id="core">
+      <header><span class="eyebrow">Fairness boundary</span><h2>Core Operations 与 Hooks</h2><p>插件只能提交 operation filters；Web Core Worker 或 Rust core 负责随机、候选、结果、记录、统计和 durable receipt。</p></header>
+      <div class="two-column">
+        <pre><code>{
+  "operation": "draw",
+  "filters": {
+    "listId": "default",
+    "target": "people",
+    "count": 1,
+    "gender": "all",
+    "allowDuplicates": false
+  }
+}</code></pre>
+        <div class="feature-list"><h3>Hook rules</h3><p>before hooks 按 plugin load order 串行执行；后者覆盖前者的四个可变 filter 字段。</p><h3>Deadlines</h3><p>单 hook 最多 3 秒，整次 operation 累计最多 5 秒。</p><h3>Auto-disable</h3><p>10 分钟内 3 次 failure 或 5 次 explicit abort 会自动停用插件。after event 只在 commit 成功后发送。</p></div>
+      </div>
+    </section>
+
+    <section id="errors">
+      <header><span class="eyebrow">Structured failures</span><h2>错误码与处理方式</h2><p>插件收到 bounded message，不会收到 stack trace、credential、native path 或 native handle。</p></header>
+      <div class="table">
+        <div class="table-row head"><strong>Code</strong><strong>含义</strong><strong>处理</strong></div>
+        <div class="table-row"><code>UNSUPPORTED_PLATFORM</code><strong>可选能力当前不可用</strong><span>使用 Web fallback 或安全跳过</span></div>
+        <div class="table-row"><code>PERMISSION_DENIED</code><strong>权限未授予</strong><span>不能靠重试解决</span></div>
+        <div class="table-row"><code>PENDING_CONFIRMATION</code><strong>需要 host confirmation</strong><span>使用 exact confirmation ID 重试</span></div>
+        <div class="table-row"><code>RESOURCE_LIMIT</code><strong>超出插件配额</strong><span>释放资源后重试</span></div>
+        <div class="table-row"><code>PLUGIN_INSTANCE_REVOKED</code><strong>session 已失效</strong><span>重新激活插件</span></div>
+        <div class="table-row"><code>TIMEOUT / CANCELLED</code><strong>请求被超时或取消</strong><span>非幂等操作使用新 key</span></div>
+        <div class="table-row"><code>CORE_INTEGRITY_FAILURE</code><strong>protected state 不一致</strong><span>停止并进入恢复流程</span></div>
+        <div class="table-row"><code>PATH_OUTSIDE_ROOT / NETWORK_ADDRESS_DENIED</code><strong>文件或网络目标越界</strong><span>修正输入，不能盲目重试</span></div>
+      </div>
+    </section>
+
+    <section id="internal">
+      <header><span class="eyebrow">Host implementation only</span><h2>不要直接调用 native commands</h2><p><code>plugin_runner_start</code>、<code>plugin_runner_send</code>、<code>plugin_files_read</code>、<code>plugin_net_request</code> 和 <code>core_prize_execute</code> 是宿主内部实现。插件只能使用 SDK。</p></header>
+      <div class="boundary-grid"><article><h3>Host responsibilities</h3><p>校验 manifest、permission、session identity、resource ownership、idempotency、limits、audit 和 cleanup。</p></article><article><h3>Plugin responsibilities</h3><p>在 deactivate 中释放本地资源；处理 structured errors；不缓存 host handles；不伪造 core result、random、records 或 state。</p></article></div>
+    </section>
+
+    <footer><a href="plugin-development.md">完整 Markdown 参考</a> · CyreneNameRoller Plugin API 1.5.0 · 2026</footer>
+  </main>
+  <script>
+    const root = document.documentElement
+    const saved = localStorage.getItem('cyrene-docs-theme')
+    if (saved === 'dark' || (!saved && matchMedia('(prefers-color-scheme: dark)').matches)) root.classList.add('dark')
+  </script>
+</body>
+</html>
