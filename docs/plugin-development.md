@@ -1,510 +1,331 @@
-# CyreneNameRoller Plugin Development Guide
+# CyreneNameRoller Plugin API 1.5
 
-This template targets Plugin API `1.5.0`. API 1.4 manifests are migration-only
-inputs and cannot be published or packed by the API 1.5 `cnrp` tool.
+This repository is the API `1.5.0` plugin template. API 1.4 and older
+installations remain visible to the host as migration metadata, but their code
+is never activated and they cannot be published with the API 1.5 CLI.
 
-## Project structure
+## Quick start
+
+```sh
+cnrp create my-plugin --template api15
+cd my-plugin
+cnrp validate .
+cnrp pack . --out dist/my-plugin.cnrp
+```
+
+The application bundles the `cnrp-runner`; plugin users do not need to install
+Node, Bun, or Deno. The SDK is a thin JSON-RPC client. It does not expose
+Tauri IPC, Pinia stores, host module imports, or arbitrary host JavaScript.
+
+## Project layout
 
 ```text
 my-plugin/
   manifest.json
-  README.md
   src/worker.js
-  src/visual.js
   pages/main.html
-  animations/presets.json
-  assets/icon.svg
+  assets/
+  README.md
 ```
-
-Use `cnrp create <directory> --template api15` for the canonical API 1.5 process-entry template.
-
-API 1.5 uses an explicit `api: "1.5"` manifest, a bundled `cnrp-runner`
-process entry, typed permission declarations, scoped files/network access,
-and optional hooks/signatures. The old `engine`, string `entry`, and API 1.4
-component helpers are migration-only and are rejected for publication.
 
 ## Manifest
 
+API 1.5 uses an explicit API marker and exact declarations. Unknown fields are
+rejected so a permission cannot be broadened accidentally.
+
 ```json
 {
+  "api": "1.5",
   "schemaVersion": 1,
   "id": "cn.example.my-plugin",
-  "name": "My Plugin",
   "version": "1.0.0",
-  "author": "Your Name",
-  "engine": { "min": "1.2.0", "max": "1.2.0" },
-  "entry": "src/worker.js",
-  "readme": "README.md",
-  "permissions": ["events:draw", "events:lifecycle", "draw:execute", "storage:read", "storage:write"],
-  "dependencies": [],
-  "contributes": {
-    "pages": [
-      { "id": "main", "title": "Plugin", "location": "dock", "order": 700, "icon": "sparkle-24-regular", "entry": "pages/main.html" }
-    ],
-    "commands": [
-      { "id": "refresh", "title": "刷新插件数据", "locations": ["command-palette", "page-header"], "icon": "arrow-clockwise-24-regular" }
-    ]
-  }
-}
-```
-
-The plugin ID is the permanent identity for installation, updates and storage. Use a lower-case reverse-domain identifier. `engine` refers to the plugin API version, not the application `26.x` version.
-
-`engine.min` is the hard requirement: when it is newer than the host API, the plugin cannot be loaded. `engine.max` describes the newest API version the developer has verified. A newer host will still load a plugin whose `engine.max` is older, but will show a compatibility warning because some behavior may have changed. This lets the loader remain backward compatible without pretending every old plugin has been fully verified on every future API.
-
-## Worker lifecycle
-
-```js
-import { definePlugin, PluginEvents } from '@starcyrene/cyrene-name-roller/plugin-sdk'
-
-definePlugin({
-  async activate(context) {
-    this.request = context.request
-  },
-  async onEvent(event, payload) {
-    if (event === PluginEvents.ROLLER_RESULT) {
-      await this.request('notifications.show', {
-        message: `Received ${payload.results.length} results`,
-        type: 'info'
-      })
-    }
-  },
-  async deactivate() {
-    this.request = null
-  }
-})
-```
-
-Activation must complete within ten seconds. The Worker has no host DOM, Pinia, arbitrary Tauri invocation, network API, child Worker or `importScripts` access. Unhandled runtime errors disable the plugin.
-
-## Permissions and RPC
-
-| Permission | RPC | Purpose |
-| --- | --- | --- |
-| `storage:read` | `storage.read` | Read one value in the plugin namespace. |
-| `storage:write` | `storage.write` | Write one value in the plugin namespace. |
-| `events:draw` | — | Receive draw events. |
-| `events:lifecycle` | — | Receive application-ready, route, theme and resize events. |
-| `draw:execute` | `draw.execute` | Request a host-owned CAF draw and append its statistics/history transaction. |
-| `ui:animations` | — | Contribute validated animation packs. |
-| `ui:visual-surfaces` | — | Contribute isolated background Canvas/WebGL workers. |
-| `ui:appearance` | — | Contribute validated semantic appearance-token packs. |
-| `notifications:show` | `notifications.show` | Show a host notification. |
-| `audio:select` | `audio.select` | Ask the user to choose an audio file. |
-| `audio:play` | `audio.play` | Play a user-selected local audio data URL. |
-| `names:read` | `names.read` | Read a snapshot of lists, people and groups. |
-| `records:read` | `records.read` | Read a snapshot of draw history. |
-| `statistics:read` | `statistics.read` | Read aggregate draw counts and the total count. |
-| `balance:read` | `balance.read` | Read the fairness algorithm version, enabled state and public parameters. |
-
-Core lists, existing draw history, statistics and fairness parameters are intentionally read-only. The SDK does not expose matching write RPCs, so plugins cannot rewrite history, alter counts or weaken fairness. `draw.execute` is the compatibility alias for the host-owned `draw` transaction: the host chooses results through CAF, updates statistics and appends immutable records as one operation. `storage.write` writes only inside that plugin's own namespace.
-
-Audio files are limited to 16 MB each. The plugin namespace has a 96 MB serialized data quota. Storage keys are restricted to short alphanumeric/dot/dash/underscore values.
-
-### Composable host extension model
-
-API 1.2 is not designed as an ever-growing list of feature-specific RPC names. Plugins receive a host descriptor and compose a small set of primitives:
-
-```js
-import { describeHost, queryResource, executeTransaction } from '@starcyrene/cyrene-name-roller/plugin-sdk'
-
-const host = await describeHost(context)
-const names = await queryResource(context, 'names', { listId: 'class-a' })
-const receipt = await executeTransaction(context, 'draw', {
-  listId: names.currentListId,
-  target: 'people',
-  count: 1
-})
-```
-
-`host.resources` lists read-only resources available to the installed plugin. `host.transactions` lists host-owned mutations. A future host can register another resource or transaction without inventing a new transport or changing the page bridge. The same descriptor is available as `context.host` and through `host.describe`, allowing old plugins to detect new capabilities and degrade gracefully.
-
-### Plugin-owned commands
-
-Commands are a generic product contribution, not a list of privileged host actions. They let the host place a plugin-defined action in a command palette, page header or context menu while the implementation remains in the plugin Worker:
-
-```js
-import { definePlugin } from '@starcyrene/cyrene-name-roller/plugin-sdk'
-
-definePlugin({
-  async onCommand(commandId, args) {
-    if (commandId !== 'refresh') return { handled: false }
-    const value = await this.request('storage.read', { key: 'settings' })
-    return { handled: true, value, args }
-  }
-})
-```
-
-Declare the command in `manifest.json`:
-
-```json
-{
-  "contributes": {
-    "commands": [
-      {
-        "id": "refresh",
-        "title": "刷新插件数据",
-        "titleEn": "Refresh plugin data",
-        "locations": ["command-palette", "page-header"],
-        "icon": "arrow-clockwise-24-regular",
-        "order": 300
-      }
-    ]
-  }
-}
-```
-
-The host validates the declaration, keeps the command registry separate from core routes, and brokers invocation to the plugin Worker with a bounded timeout. A command does not gain extra permissions and cannot write core history, statistics, CAF parameters or draw results. Older hosts can ignore this optional contribution after inspecting `host.extensionPoints.commands`.
-
-The model is **product freedom, core-hosted state transitions**: a plugin is free to create a new page, interaction model, visualization or workflow; whenever it needs to modify protected application state, it submits an intent to a discovered host transaction. Existing records, statistics and CAF parameters remain immutable, and draw results remain host-selected.
-
-## Platform compatibility and system bridges
-
-Plugins never invoke Tauri, PowerShell, `cmd`, browser globals, or arbitrary child processes directly. The host exposes a small, permissioned platform bridge. Every bridge request returns a structured result; an unavailable optional capability returns `ok: false` with `code: "UNSUPPORTED_PLATFORM"` instead of throwing, so the plugin can safely continue on Web.
-
-The Worker context includes `context.platform` (`web` or `tauri`, plus the detected OS) and `context.capabilities`. Use the SDK helpers `getPlatform()`, `getCapabilities()`, `isCapabilityAvailable()` and `requestCapability()` to write one plugin that works on both targets.
-
-Supported bridges are `system.open-url`, `system.select-file`, `system.select-directory`, `system.clipboard-read`, `system.clipboard-write`, `system.reveal-file` and `system.execute`. URL opening, file selection, clipboard and audio selection use browser APIs on Web where possible; directory selection, file revealing and native process operations are unavailable on Web and safely degrade.
-
-Declare capabilities explicitly in `manifest.json`:
-
-```json
-{
-  "permissions": ["system:select-directory", "system:open-url"],
-  "capabilities": {
-    "system:select-directory": { "required": false },
-    "system:open-url": { "required": true }
-  }
-}
-```
-
-Required capabilities unavailable on the current platform prevent activation. Optional capabilities are shown to the user during installation and return a structured unsupported result. A plugin should either show a Web-specific UI or skip that operation:
-
-```js
-import { definePlugin, getPlatform, requestCapability } from '@starcyrene/cyrene-name-roller/plugin-sdk'
-
-definePlugin({
-  async activate(context) {
-    const platform = await getPlatform(context)
-    if (platform.runtime === 'tauri') {
-      await requestCapability(context, 'system.select-directory')
-    } else {
-      await context.request('notifications.show', { message: 'Web 端不支持目录选择，已使用浏览器兼容流程。' })
-    }
-  }
-})
-```
-
-For platform-specific Worker or page code, provide `platformEntries.web` and native entries such as `platformEntries.windows` or `platformEntries.macos`. The host chooses the Web entry in a browser and the OS-specific entry in Tauri. A page is not registered on Web only when it has neither `platformEntries.web` nor a generic `entry` fallback.
-
-`system.execute` is deliberately restricted to fixed, user-visible operations declared in the manifest. The command name must be a simple executable name and its argument array is immutable; arbitrary PowerShell/CMD strings, shell pipelines and runtime command construction are rejected. If a feature needs dynamic data, use a dedicated bridge or implement a Web-specific fallback instead.
-
-## Draw events
-
-- `draw:item-result`
-- `draw:result`
-- `roller:start`
-- `roller:item-result`
-- `roller:result`
-- `card:item-result`
-- `card:result`
-- `lottery:item-result`
-- `lottery:result`
-- `lottery:assign-result`
-
-Use item events for per-result behavior and summary events for once-per-operation behavior.
-
-Lifecycle events require `events:lifecycle`:
-
-- `app:ready`
-- `app:route-changed`
-- `app:theme-changed`
-- `app:resize`
-- `plugin:storage-changed` (sent only to the plugin that wrote the key; page, Worker and subscribed visual surfaces receive it)
-
-Event payloads are cloned snapshots. Mutating them never changes application state.
-
-`app:theme-changed` is also the visual-performance contract. Its payload contains
-`theme`, `dark`, `accent`, `perfAnimations` and `reducedMotion`. The application
-settings switch `perfAnimations` is authoritative: when it is false, Canvas/WebGL
-surfaces must stop continuous render loops and clear non-essential effects, then
-resume with at most one loop when it is restored. `reducedMotion` describes the
-browser/Windows preference for diagnostics and adaptive styling; it does not
-silently disable host GSAP/WAAPI animations. The host caches the latest lifecycle
-snapshot and replays subscribed events after a visual surface activates.
-
-## Host-mediated CAF draws
-
-Plugins can build entirely new draw experiences, but must ask the host to commit the result:
-
-```js
-import { definePlugin, executeDraw } from '@starcyrene/cyrene-name-roller/plugin-sdk'
-
-definePlugin({
-  async activate(context) {
-    const receipt = await executeDraw(context, {
-      listId: 'class-a',
-      target: 'people',
-      gender: 'all',
-      count: 6,
-      allowDuplicates: false
-    })
-    console.log(receipt.operationId, receipt.results)
-  }
-})
-```
-
-Only filters are accepted: `listId`, `target`, `gender`, `count` and `allowDuplicates`. Candidate weights, selected IDs, result arrays, record bodies and fairness settings are not part of the API. The returned receipt is generated by the host and includes the operation ID, algorithm version and committed results. People draws use CAF; group draws use the host group-selection implementation. A successful request updates statistics where applicable and appends records tagged with the plugin ID and operation ID.
-
-## Plugin pages
-
-Use host-native settings pages whenever possible. The application renders these schemas with its own Fluent components, theme, spacing and responsive layout, so the plugin looks and behaves like a first-party page:
-
-```json
-{
-  "id": "settings",
-  "title": "My plugin",
-  "native": {
-    "type": "settings",
-    "settingsKey": "settings",
-    "controls": [
-      { "id": "enabled", "type": "toggle", "path": "enabled", "label": "Enabled", "default": true },
-      { "id": "volume", "type": "range", "path": "volume", "label": "Volume", "min": 0, "max": 1, "step": 0.01, "default": 0.7 },
-      { "id": "mode", "type": "select", "path": "mode", "label": "Mode", "options": [{ "value": "once", "label": "Once" }] },
-      { "id": "sound", "type": "audio", "path": "sound", "label": "Sound" }
-    ]
-  }
-}
-```
-
-Supported controls are `toggle`, `range`, `select`, `audio`, `animation-select`, `component-style-select`, `component-override-select`, `component-override-toggle` and `result-presentation-select`. `component-override-toggle` binds one validated `packId`: enabling it selects that override pack and disabling it restores the target default. Ordinary values are stored in the plugin namespace and can be read by the Worker through `storage.read`; contribution selectors and toggles are maintained by the host registries.
-
-HTML pages remain supported for rich custom functionality and are rendered in a sandboxed frame with the `window.CyrenePlugin.request()` bridge. They cannot access the host DOM. The host injects the current semantic appearance tokens, a small Fluent base stylesheet, `window.CyrenePlugin.host`, and live theme updates. Use the provided `.cyrene-fluent-page`, `.cyrene-fluent-card`, `.cyrene-fluent-row` and `.cyrene-muted` primitives as a baseline, then build any page-specific UI inside the plugin frame. Host-native settings pages remain the simplest choice for ordinary configuration.
-
-Set `location: "dock"` to make a substantial plugin page a first-level Dock destination. The page still uses the same sandbox and permission model; Dock placement does not grant extra privileges. `order` controls stable placement and `icon` uses a Fluent icon name. Use `location: "plugins"` for secondary/configuration pages.
-
-Native settings also support an `animation-select` control. It does not use a storage `path`; instead declare the animation `target` and optional `packId`.
-
-The component and result selectors also omit `path`. Declare a `target`; the host lists contributions from the current plugin and persists the active selection in application state.
-
-## Animation packs
-
-Declare `ui:animations` and reference one or more JSON packs:
-
-```json
-{
-  "contributes": {
-    "animationPacks": [
-      { "id": "motion", "title": "More Motion", "source": "animations/presets.json" }
-    ]
-  }
-}
-```
-
-```json
-{
-  "schemaVersion": 1,
-  "presets": [
-    {
-      "id": "soft-spring",
-      "target": "roller.finish",
-      "label": "Soft spring",
-      "animation": {
-        "keyframes": [
-          { "opacity": 0, "transform": "scale(.86) translateY(10px)" },
-          { "opacity": 1, "transform": "scale(1.04) translateY(0)", "offset": 0.7 },
-          { "opacity": 1, "transform": "scale(1)" }
-        ],
-        "options": { "duration": 620, "easing": "cubic-bezier(.2,.9,.2,1)" }
-      }
-    }
-  ]
-}
-```
-
-Targets are `page.transition`, `roller.finish`, `card.deal`, `card.flip`, `lottery.finish` and `global.transition`. Legacy WAAPI keyframes remain supported. API 1.2 additionally accepts host-run GSAP `from`/`to` definitions:
-
-```json
-{
-  "gsap": {
-    "from": { "opacity": 0, "y": 28, "scale": 0.82, "filter": "blur(8px)" },
-    "to": { "opacity": 1, "y": 0, "scale": 1, "filter": "blur(0px)" },
-    "options": { "duration": 760, "ease": "elastic.out(1,0.36)" }
-  }
-}
-```
-
-The host owns the GSAP runtime, cancellation, the application animation switch and cleanup. Plugins declare bounded visual values; they do not receive callbacks, selectors, network-backed CSS, result-writing access or unrestricted host DOM access. Animation packs cannot replace or modify the host-selected result, result text or result data.
-
-## Canvas and WebGL visual surfaces
-
-Visual surfaces are independent Workers drawing only behind core content:
-
-```json
-{
-  "permissions": ["events:lifecycle", "events:draw", "ui:visual-surfaces"],
-  "contributes": {
-    "visualSurfaces": [
-      {
-        "id": "aurora",
-        "title": "Aurora",
-        "entry": "src/visual.js",
-        "placement": "background",
-        "events": ["app:resize", "draw:result"]
-      }
-    ]
-  }
-}
-```
-
-```js
-import { defineVisualSurface } from '@starcyrene/cyrene-name-roller/plugin-sdk'
-
-defineVisualSurface({
-  activate(context) {
-    this.canvas = context.canvas
-    this.ctx = context.canvas.getContext('2d')
-  },
-  onResize(viewport) {
-    this.canvas.width = viewport.pixelWidth
-    this.canvas.height = viewport.pixelHeight
-  },
-  onEvent(event) {
-    if (event === 'draw:result') this.renderBurst()
-  },
-  deactivate() {}
-})
-```
-
-The host transfers an `OffscreenCanvas` where supported and calls visual lifecycle methods in this order: `activate(context)`, initial `onResize(viewport)`, then subscribed lifecycle-event replay. Canvas 2D and WebGL are available through the browser implementation. The host GSAP runner animates registered host targets; it is not injected into the isolated visual Worker. Use a bounded Worker render loop for particles and multi-layer effects, stop it in `deactivate`, obey the host `perfAnimations` switch, and degrade gracefully when OffscreenCanvas/WebGL is unavailable.
-
-## Semantic appearance packs
-
-Appearance packs are safe application-wide visual token sets, not arbitrary CSS. They can provide a full theme or a small override that inherits a generated Peach/Fluent base:
-
-```json
-{
-  "permissions": ["ui:appearance"],
-  "contributes": {
-    "appearancePacks": [{
-      "id": "ocean-glass",
-      "title": "海蓝玻璃",
-      "titleEn": "Ocean Glass",
-      "base": "fluent",
-      "light": {
-        "--accent": "#0067c0",
-        "--bg-base": "#f7fbff",
-        "--text-primary": "#10243a",
-        "--text-on-accent": "#ffffff"
-      },
-      "dark": {
-        "--accent": "#60aeea",
-        "--bg-base": "#101820",
-        "--text-primary": "#f4f8fc",
-        "--text-on-accent": "#0a1620"
-      }
-    }]
-  }
-}
-```
-
-Only documented semantic color and shadow tokens are accepted. Selectors, layout properties, scripts and network/data-backed CSS are rejected. Explicit foreground/background pairs must meet a 4.5:1 contrast ratio. If the providing plugin is disabled or removed, the application automatically falls back to Peach.
-
-## Dependencies
-
-```json
-{
-  "dependencies": [
-    { "id": "cn.example.base", "range": "^1.0.0", "dataAccess": false }
-  ]
-}
-```
-
-The host installs dependencies first, detects cycles, validates version ranges and prevents disabling/uninstalling a plugin that has enabled dependents. Cross-plugin storage reads additionally require `dataAccess: true` and `shareData: true` on the target plugin.
-
-Use the SDK helper instead of constructing the RPC name manually:
-
-```js
-import { readDependencyStorage } from '@starcyrene/cyrene-name-roller/plugin-sdk'
-
-const sharedSettings = await readDependencyStorage(context, 'cn.example.base', 'settings')
-```
-
-## Packaging and signatures
-
-```bash
-npx cnrp validate ./my-plugin
-npx cnrp pack ./my-plugin --out ./dist/my-plugin-1.0.0.cnrp
-```
-
-The CLI bundles the Worker with esbuild, obfuscates JavaScript, creates a per-file SHA-256 integrity map, compresses the package and emits an authenticated `CNRP1` AES-GCM envelope.
-
-For a catalog release, sign the package with an Ed25519 private key:
-
-```bash
-npx cnrp pack ./my-plugin \
-  --out ./dist/my-plugin-1.0.0.cnrp \
-  --private-key ./publisher-private.pem
-```
-
-Never commit the private key. Publish the base64 SPKI public key in `plugins/list.json`. GitHub Release assets expose their SHA-256 digest through the API, while the Ed25519 signature remains the publisher-identity trust mechanism.
-
-## Catalog entry
-
-```json
-{
-  "id": "cn.example.my-plugin",
   "name": "My Plugin",
-  "repository": "owner/repository",
-  "release": {
-    "provider": "github",
-    "channel": "latest",
-    "assetPattern": "my-plugin-*.cnrp"
+  "author": "Your Name",
+  "description": "A short description.",
+  "entry": {
+    "runtime": "cnrp-runner",
+    "script": "src/worker.js",
+    "args": []
   },
-  "publisherKey": "base64-spki-ed25519",
-  "dependencies": []
+  "platforms": ["web", "tauri"],
+  "permissions": [
+    { "id": "core:names:read", "required": false, "platforms": ["web", "tauri"] },
+    { "id": "page:read", "required": true, "platforms": ["web", "tauri"] },
+    { "id": "style:main", "required": false, "platforms": ["web", "tauri"] }
+  ],
+  "files": {
+    "app": { "read": true, "write": false, "execute": false },
+    "external": []
+  },
+  "network": { "internet": false },
+  "windows": {
+    "create": false,
+    "main": { "control": false },
+    "floating": { "control": false, "alwaysOnTop": false }
+  },
+  "pages": [
+    {
+      "id": "dashboard",
+      "location": "main",
+      "title": "Dashboard",
+      "entry": "pages/main.html",
+      "children": []
+    }
+  ],
+  "hooks": [],
+  "signature": null
 }
 ```
 
-For GitHub plugins, do not hard-code `version`, `downloadUrl` or `sha256`. The application resolves the latest stable GitHub Release, selects the uploaded `.cnrp` asset with `assetPattern`, and uses the asset's `sha256:` digest automatically. Drafts and prereleases are not selected. Fixed `version`/`downloadUrl`/`sha256` entries remain supported for non-GitHub or pinned-version catalogs.
+`engine` is informational only in API 1.5. It is not an activation selector.
+The `entry`, `platforms`, permission objects, file scopes, network declaration,
+window declaration, pages, hooks, and signature metadata are the canonical
+contract. A page must be declared in `pages`; runtime page registration is not
+available.
 
-The application downloads `plugins/list.json` at runtime through the selected source (`gh.昔涟.cn`, `gh-proxy.com` or GitHub). A proxy is only a transport; the GitHub asset digest and publisher signature remain the trust boundary.
+## SDK and lifecycle
 
-## Recovery and release checklist
+```js
+import { definePlugin, groups, PluginEvents } from '@starcyrene/cyrene-name-roller/plugin-sdk'
 
-- Validate the manifest and package.
-- Request only required permissions.
-- Test install, enable, disable, update and uninstall.
-- Test the page in light/dark themes and narrow layouts.
-- Test all declared draw events without duplicating summary/item behavior.
-- Do not include secrets, absolute local paths or publisher private keys.
-- Verify the Release asset name matches `assetPattern` and the catalog public key is current.
-- If a plugin crashes the application session, the next startup enters clean mode and disables all plugins for recovery.
+definePlugin({
+  async activate(context) {
+    this.context = context
+    const platform = await context.request('runtime.platform')
+    this.names = await groups.core.names.read()
+    await context.request('notifications.show', {
+      message: `Running on ${platform.runtime}`,
+      type: 'info'
+    })
+  },
 
-## API 1.4 migration-only UI
+  async onEvent(event, payload) {
+    if (event === PluginEvents.AFTER_OPERATION) {
+      console.log(payload.operationId, payload.committed)
+    }
+  },
 
-API 1.4 UI contributions are retained here only as migration guidance for existing installed plugins. They are not valid API 1.5 publication inputs. New plugins must use the API 1.5 manifest and typed groups; arbitrary CSS, host DOM access and executable DOM operations remain unavailable.
+  async deactivate() {
+    this.context = null
+  }
+})
+```
 
-### Component styles and visibility
+The logical lifecycle is `hello` -> `hello.accepted` -> `initialize` ->
+`ready`. Activation must complete within ten seconds. Desktop plugins run in
+the bundled runner through authenticated local JSON-RPC. Web plugins run in an
+isolated Worker. The host owns processes, Workers, pages, windows, styles,
+requests, and audit records.
 
-Use the `ui:component-styles` and `ui:component-overrides` permissions only when needed. Styles target stable component IDs and may adjust documented size, semantic colors, font size/weight, host font aliases, spacing, radius, borders, shadows and alignment tokens. CSS selectors, CSS files, `url()`, `var()`, `display`, `z-index`, `pointer-events`, positioning and script-backed values are rejected. Protected targets such as the authoritative result, list identity, errors, integrity state and recovery controls cannot be hidden or restyled with plugin fonts.
+## SDK groups
 
-Existing API 1.4 packages may continue to be read by a compatible host, but `cnrp validate` and `cnrp pack` reject them for publication with an API 1.5 manifest error.
+The SDK exports these explicit groups. Every method is a brokered RPC and
+returns a structured result or throws a typed `PluginApiError`.
 
-### Native views and slots
+| Group | Examples | Boundary |
+| --- | --- | --- |
+| `page` | `read`, `write`, `writeSensitive` | Host field maps and confirmation |
+| `window` | `create`, `close` | Opaque host-owned window IDs |
+| `files` | `read`, `write` | Manifest scopes and bounded transfers |
+| `net` | `request` | HTTP/HTTPS, DNS, size, timeout, concurrency |
+| `state` | `read`, `write` | Alias for ordinary page state |
+| `dom` | `query`, `read`, `write`, `insert` | Controlled host DOM operations |
+| `core` | `names`, `records`, `statistics`, `balance` | Read-only fairness data |
+| `core.hook` | `before`, `after` | Operation hook events and filters |
 
-`ui:native-views` contributions use a fixed declarative schema and one of these slot IDs:
+Example:
 
-- `slot:roller.side-panel`
-- `slot:roller.below-result`
-- `slot:records.toolbar`
+```js
+const result = await groups.net.request({
+  url: 'https://example.com/data.json',
+  method: 'GET'
+})
+```
 
-Unknown slots return `available: false`. HTML, scripts, expressions, `eval`, arbitrary host objects and non-semantic icons are rejected. Generic native views always show an unavoidable "由插件提供" source label and the plugin name. `VerifiedResult` is not a general view node: only the host injects the current verified `DrawReceipt` in the result presentation context.
+The SDK has no `dom.execute`. Do not use `eval`, function source, raw HTML,
+script URLs, inline event handlers, or native handles.
 
-### Authoritative draws and platform boundaries
+## Permissions and platforms
 
-Roller host draws and plugin-requested draws use the same Core Client transaction entry. On Web, the Core Worker owns the algorithm, serial transaction queue, statistics/history submission and `DrawReceipt` generation. On Tauri, Rust owns the authoritative draw, statistics, records and authenticated `CoreStateEnvelope`; the frontend Store and generic `storage_set` cannot write core data. Plugins receive a bound `Principal` and capability-scoped RPC only, never the Worker port, internal request IDs or Tauri grant tokens.
+Each permission has an `id`, `required` flag, and `platforms` list. A required
+permission is checked only when its platform scope applies. An unavailable
+required capability prevents activation. An unavailable optional capability
+remains visible with `available: false` and returns `UNSUPPORTED_PLATFORM`.
 
-API 1.2 plugins remain valid without repackaging. Their legacy RPC path creates a `legacyPrincipal` and reaches the same authorization kernel, and their existing events, required `DrawReceipt` fields and Chinese error messages remain compatible. See [API 1.2 to 1.3 migration](./api-1.2-to-1.3.md) before declaring new 1.3 contributions.
+Native-only examples include application file access, external file roots,
+window control, and `system:execute`. Web network access is fail-closed when
+the browser cannot bind a request atomically to the validated DNS address.
 
-Before publishing the SDK or a catalog entry, run `node --test scripts/plugin-api-1.4-release.test.mjs`. The regression intentionally keeps the frozen API 1.2 fixture bytes unchanged and verifies API 1.3 compatibility separately.
+```js
+const capabilities = await groups.runtime.capabilities()
+const directory = capabilities['system:select-directory']
+if (directory?.available) {
+  await context.request('system.select-directory')
+}
+```
+
+`system:execute` is an explicit system-level risk. It requires a manifest
+operation with a fixed executable and fixed argument array. Shell strings,
+pipelines, arbitrary directories, and runtime command construction are
+rejected.
+
+## Pages, state, windows, and styles
+
+Pages are manifest-only contributions. Native host routes come first; plugin
+pages then follow plugin load order and manifest declaration order. Use
+`location: "main"` or `location: "settings"`, and declare nested `children`
+when needed.
+
+Page and window methods return opaque IDs. IDs are scoped to the creating
+plugin and are invalid after disable, crash, unload, or safe mode. Initial
+limits include four windows, sixteen pages, and thirty-two injected style
+handles per plugin.
+
+Ordinary writable state is limited to:
+
+- `language`
+- `theme`
+- `animation`
+- `display`
+- `roller.filters.listId`
+- `roller.filters.target`
+- `roller.filters.count`
+- `roller.filters.gender`
+- `roller.filters.allowDuplicates`
+
+Sensitive state such as permissions, plugin enablement, list contents,
+fairness settings, import/export, record clearing, and window security needs
+`page:write-sensitive` plus a host confirmation bound to the exact patch.
+
+`style:main` and `style:settings` allow unrestricted CSS selectors within
+bounded style handles. CSS is intentionally powerful enough to affect host
+presentation, so style access is shown in installation risk confirmation and
+all handles are removed during cleanup.
+
+## Controlled DOM
+
+DOM permissions expose snapshots and structured operations only:
+
+```js
+const nodes = await groups.dom.query({
+  surface: 'main',
+  selector: '[data-plugin-slot]'
+})
+await groups.dom.write({
+  nodeId: nodes[0].nodeId,
+  fields: { textContent: 'Updated by the plugin' }
+})
+await groups.dom.insert({
+  nodeId: nodes[0].nodeId,
+  node: { type: 'element', tag: 'span', text: 'Status' }
+})
+```
+
+The host issues opaque node IDs. Snapshots contain bounded tag, text,
+attributes, and child-count data. Inserted nodes are created by the host from
+allowlisted structured data. Raw HTML, script URLs, inline handlers,
+function values, host object references, Tauri globals, and Core Worker ports
+are rejected.
+
+## Core operations and fairness
+
+Plugins can request host-owned operations but cannot provide algorithm state,
+random values, candidates, results, records, statistics, or next-state data.
+Only operation filters are mutable:
+
+```js
+const receipt = await groups.core.operations.execute('draw', {
+  listId: 'default',
+  target: 'people',
+  count: 1,
+  gender: 'all',
+  allowDuplicates: false
+})
+```
+
+Before hooks execute serially in plugin load order. Later plugins overwrite
+earlier values for the four allowed filter fields. A hook can return `allow`
+or `abort`; invalid responses, exceptions, disconnects, and timeouts abort the
+operation. The host records original, per-plugin, and final filters.
+
+The per-operation hook deadline is three seconds and the cumulative budget is
+five seconds. Three hook failures in ten minutes or five explicit aborts in ten
+minutes automatically disables the plugin. After hooks are events and are
+delivered only after the host commits successfully.
+
+Name draws, card operations, lottery draws, and prize assignment are committed
+by the Web Core Worker or Rust core. The core verifies protected state before
+each operation, uses host-owned randomness, and returns a durable receipt. An
+integrity failure returns recovery-required status and commits nothing.
+
+## File, network, and audit rules
+
+File paths are canonicalized under the declared app or external root. Traversal,
+protected core roots, Windows UNC/drive-relative/reparse paths, POSIX symlink
+escapes, and undeclared executables are rejected. Binary values use bounded
+base64 chunks; raw `Uint8Array` values are not placed in JSON.
+
+Network requests are HTTP/HTTPS only. Redirects cannot change protocol and the
+current native/Web brokers deny redirects unless the target can be revalidated.
+Loopback, link-local, metadata, private, alternate IPv4, IPv4-mapped IPv6,
+and unresolved destinations are denied. Requests have bounded body size,
+timeout, and concurrency.
+
+The host keeps append-only audit records with time, plugin ID, instance ID,
+method, resource, decision, result code, bytes, duration, and correlation ID.
+Network resources are reduced to hostnames; plugin code cannot read audit
+storage. Records are bounded by count and storage size.
+
+## Events
+
+Lifecycle events include `app:ready`, `app:route-changed`,
+`app:theme-changed`, `app:resize`, and `plugin:storage-changed`. Operation
+events include before/after operation notifications and the existing draw,
+card, lottery, and prize result events. Payloads are cloned snapshots.
+
+After-operation payloads contain the operation ID, receipt, filter diff, hook
+audit, and committed status. They must not be used to replace host-selected
+results.
+
+## Signing, publishing, and migration
+
+The CLI validates the exact manifest before packing. A package may include
+Ed25519 publisher signature metadata; installation confirmation shows whether
+the package is signed and summarizes network, system execution, readable core
+categories, DOM/CSS access, and external roots.
+
+The catalog uses GitHub Release metadata rather than pinned download URLs. A
+release must contain one matching `.cnrp` asset, use a version-matching tag,
+and never include private signing material.
+
+When migrating API 1.4 or older:
+
+1. Keep the installed metadata so the host can display the plugin identity and
+   version.
+2. Add `api: "1.5"` and convert the string entry and permission list to the
+   canonical declarations.
+3. Move UI contributions into manifest pages, typed page APIs, styles, or
+   controlled DOM operations.
+4. Replace result-writing or fairness-changing code with host core operations.
+5. Validate and repack with `cnrp validate` and `cnrp pack`.
+
+Safe mode is a clean baseline. It skips plugin initialization, revokes
+sessions, stops runner processes, cancels requests, removes styles, unregisters
+routes/hooks, disposes session DOM, and reloads affected views as needed. It
+does not automatically reset protected core data.
+
+## Limits and errors
+
+Important structured errors include:
+
+- `UNSUPPORTED_PLATFORM`
+- `PERMISSION_DENIED`
+- `PENDING_CONFIRMATION`
+- `RESOURCE_LIMIT`
+- `PLUGIN_INSTANCE_REVOKED`
+- `CORE_INTEGRITY_FAILURE`
+
+The host enforces limits for RPC frames, binary operations, windows, pages,
+styles, DOM insertions, concurrent RPC/network/file operations, and process
+lifetime. Treat limit errors as terminal for the current request and release
+local resources in `deactivate`.

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>CyreneNameRoller 插件开发中心</title>
-  <link rel="stylesheet" href="styles.css?v=1.4.0">
+  <link rel="stylesheet" href="styles.css?v=1.5.0">
 </head>
 <body>
   <aside class="nav">
@@ -13,8 +13,8 @@
     <nav>
       <a href="#overview">概览</a>
       <a href="#native">原生页面控件</a>
-      <a href="#ui-customization">API 1.4 UI 定制</a>
-      <a href="#api14-examples">API 1.4 示例</a>
+      <a href="#ui-customization">API 1.5 UI 与 DOM</a>
+      <a href="#api14-examples">API 1.5 示例</a>
       <a href="#dock">Dock 大型页面</a>
       <a href="#draw">宿主抽取事务</a>
       <a href="#motion">动画与视觉层</a>
@@ -31,7 +31,7 @@
 
   <main>
     <section id="overview" class="hero">
-      <div><span class="eyebrow">Plugin API 1.4.0</span><h1>做一个真正融入宿主的插件</h1><p>用宿主 Fluent 设置、受限 UI 定制、固定插槽、权威抽签事务、动画包与 Canvas/WebGL 视觉层，在 Web 和 Tauri 上构建页面级大型功能。</p><div class="actions"><a class="button primary" href="https://github.com/Cyrene2008/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
+      <div><span class="eyebrow">Plugin API 1.5.0</span><h1>构建安全、可移植的宿主插件</h1><p>使用 bundled runner、Web Worker、typed API groups、manifest 页面、受控 DOM、权威 core operations 和明确的权限边界，在 Web 与 Tauri 上构建插件。</p><div class="actions"><a class="button primary" href="https://github.com/CyreneNameRoller/CyreneNameRoller-Plugin-Template/generate">使用此模板</a><a class="button secondary" href="https://github.com/Cyrene2008/CyreneNameRoller">查看宿主源码</a></div></div>
       <div class="hero-card"><div class="code-title"><span></span><span></span><span></span>manifest.json</div><pre><code>"native": {
   "type": "settings",
   "settingsKey": "settings",
@@ -52,9 +52,9 @@
     </section>
 
     <section id="ui-customization">
-      <header><span class="eyebrow">API 1.4 host-owned UI</span><h2>受限组件样式、固定插槽与权威结果</h2><p>插件只声明意图，宿主负责校验、解析和渲染。插件不会获得 Vue 组件、宿主 DOM、任意 CSS 或核心算法引用。</p></header>
+        <header><span class="eyebrow">API 1.5 host-owned UI</span><h2>页面、样式、受控 DOM 与权威结果</h2><p>插件只声明意图，宿主负责校验、解析和渲染。插件通过 typed groups 使用页面、样式和受控 DOM API，不会获得宿主模块、Tauri IPC 或核心算法引用。</p></header>
       <div class="grid">
-        <article class="card"><h3>稳定组件 ID</h3><code>11 styled · 6 hide-only</code><p>示例覆盖导航、点名、卡牌、抽奖和统计；API 1.4 另提供六个细粒度筛选器目标。</p></article>
+        <article class="card"><h3>稳定组件 ID</h3><code>11 styled · 6 hide-only</code><p>示例覆盖导航、点名、卡牌、抽奖和统计；API 1.5 通过 typed page、style 和 DOM groups 扩展宿主表面。</p></article>
         <article class="card"><h3>原生贡献选择</h3><code>select · toggle</code><p>设置页可直接切换样式包、覆盖包和宿主绑定的权威结果布局。</p></article>
         <article class="card"><h3>固定原生插槽</h3><code>3 slot: views</code><p>侧栏、结果下方和记录工具栏都使用白名单 Schema、语义图标、只读绑定和宿主代理命令。</p></article>
         <article class="card"><h3>VerifiedResult</h3><code>single · list · grid · spotlight</code><p>四种布局只改变呈现；姓名、结果数组和 Receipt 始终由宿主绑定。</p></article>
@@ -73,12 +73,12 @@
     "targets": { "statistics.summary":
       { "visibility": "hidden", "layout": "reserve" } } }
 ]</code></pre>
-        <div class="feature-list"><h3>细粒度筛选器</h3><p><code>roller.filter.english-mode</code>、<code>draw-target</code>、<code>gender</code>、<code>draw-count</code>、<code>duplicates</code> 与 <code>count</code> 仅允许收起。</p><h3>不可隐藏</h3><p>权威结果、名单身份、错误、完整性状态与恢复入口。覆盖包预检失败时整体拒绝，不会部分生效。</p><h3>页面通信</h3><p>页面仍调用 <code>window.CyrenePlugin.request()</code>；API 1.4 由宿主内部使用 MessageChannel，API 1.2 保留 source-checked window.message 兼容路径。</p></div>
+        <div class="feature-list"><h3>受控宿主表面</h3><p>API 1.5 页面通过 manifest 声明，使用 <code>page</code>、<code>style</code> 和 <code>dom</code> groups；节点、样式句柄和窗口 ID 都由宿主签发。</p><h3>不可隐藏</h3><p>权威结果、名单身份、错误、完整性状态与恢复入口。覆盖包预检失败时整体拒绝，不会部分生效。</p><h3>页面通信</h3><p>API 1.5 页面使用受限 RPC bridge；API 1.4 和更早版本只作为 migration-only 安装元数据保留。</p></div>
       </div>
     </section>
 
     <section id="api14-examples">
-      <header><span class="eyebrow">Runnable template inventory</span><h2>可校验、打包和运行的 API 1.4 示例</h2><p>这些项目都位于模板源码中，并由同一份 manifest 交给 CLI 与宿主解析；创建插件后可按需删除不使用的贡献和权限。</p></header>
+        <header><span class="eyebrow">Runnable template inventory</span><h2>可校验、打包和运行的 API 1.5 示例</h2><p>这些项目使用 bundled runner、typed SDK groups 和严格 manifest；创建插件后可按需删除不使用的页面、权限和 hooks。</p></header>
       <div id="api14ExamplesTable" class="table"></div>
     </section>
 
@@ -108,7 +108,7 @@
   "order": 720,
   "entry": "pages/draw-studio.html"
 }</code></pre>
-        <div class="feature-list"><h3>适合什么</h3><p>教室座位表、全新点名玩法、课堂工具、可视化面板或其他页面级功能。</p><h3>如何调用宿主</h3><p>页面使用 <code>window.CyrenePlugin.request(method, args)</code>。API 1.4 的 RPC 由宿主绑定到当前页面 Principal 和 MessagePort。</p><h3>如何保持一致</h3><p>设置优先使用原生 schema；大型 HTML 页面参考本页 Fluent tokens，并为窄屏与深色模式设计。</p></div>
+        <div class="feature-list"><h3>适合什么</h3><p>教室座位表、全新点名玩法、课堂工具、可视化面板或其他页面级功能。</p><h3>如何调用宿主</h3><p>Worker 使用 SDK typed groups；页面使用宿主注入的受限 bridge。所有请求绑定当前插件 Principal 和资源所有权。</p><h3>如何保持一致</h3><p>设置优先使用原生 schema；大型 HTML 页面参考本页 Fluent tokens，并为窄屏与深色模式设计。</p></div>
       </div>
     </section>
 
@@ -119,7 +119,7 @@
         <article class="flow-step"><b>2</b><strong>宿主执行算法</strong><span>人员走 CAF；小组走宿主核心选择实现。</span></article>
         <article class="flow-step"><b>3</b><strong>宿主原子提交</strong><span>统计与记录一并追加，写入 operationId 和 pluginId。</span></article>
       </div>
-      <pre><code>const receipt = await window.CyrenePlugin.request('draw.execute', {
+      <pre><code>const receipt = await groups.core.operations.execute('draw', {
   target: 'people', gender: 'all', count: 6, allowDuplicates: false
 })
 // receipt.results 是宿主生成的只读回执</code></pre>
@@ -178,7 +178,7 @@
   "publisherKey": "base64-spki"
 }</code></pre><div class="checklist"><h3>发布检查</h3><label>✓ Tag 使用 v1.2.3</label><label>✓ Release 非 draft / prerelease</label><label>✓ 仅一个资源匹配 assetPattern</label><label>✓ 包内版本与 tag 一致</label><label>✓ 发布者私钥不进入仓库</label></div></div></section>
 
-    <footer>CyreneNameRoller Plugin API 1.4.0 · 2026</footer>
+     <footer>CyreneNameRoller Plugin API 1.5.0 · 2026</footer>
   </main>
 
   <div id="toast" class="toast" role="status"><strong>Fluent 通知</strong><span>这是一条页面内通知。</span></div>
