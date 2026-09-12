@@ -4,6 +4,9 @@ This repository is the API `1.5.0` plugin template. API 1.4 and older
 installations remain visible to the host as migration metadata, but their code
 is never activated and they cannot be published with the API 1.5 CLI.
 
+For the exact backend RPC, permission, error, resource, and native-boundary
+contract, see [API 1.5 Backend Contract](api-1.5-backend-contract.md).
+
 ## Quick start
 
 ```sh
