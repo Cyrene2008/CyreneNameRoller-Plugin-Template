@@ -1,4 +1,4 @@
-import { definePlugin, describeHost, executeDraw, PluginEvents, queryResource } from '@starcyrene/cyrene-name-roller/plugin-sdk'
+import { definePlugin, core, page, PluginEvents } from '@starcyrene/cyrene-name-roller/plugin-sdk'
 
 const DEFAULTS = { enabled: true, volume: 0.7, mode: 'summary', sound: null }
 let request
@@ -14,47 +14,16 @@ definePlugin({
     pluginContext = context
     request = context.request
     platform = context.platform
-    const host = await describeHost(context)
-    console.info(`Cyrene host API ${host.apiVersion}: ${host.resources.length} resources, ${host.transactions.length} transactions`)
+    this.language = await page.read(context, 'language')
   },
 
   async onEvent(event, payload) {
-    if (event === PluginEvents.APP_READY) {
-      await request('storage.write', {
-        key: 'last-runtime',
-        value: { runtime: platform.runtime, os: platform.os, readyAt: Date.now() }
-      })
-      return
-    }
-
-    if (event === PluginEvents.APP_THEME_CHANGED) {
-      await request('storage.write', {
-        key: 'last-theme',
-        value: { mode: payload?.mode || 'unknown', changedAt: Date.now() }
-      })
-      return
-    }
-
-    const config = await settings()
-    if (!config.enabled) return
-    const expectedEvent = config.mode === 'each' ? PluginEvents.ROLLER_ITEM_RESULT : PluginEvents.ROLLER_RESULT
-    if (event !== expectedEvent) return
-    if (config.sound?.dataUrl) {
-      await request('audio.play', { source: config.sound.dataUrl, volume: config.volume })
-    }
-    const count = payload?.results?.length || (payload?.result ? 1 : 0)
-    await request('notifications.show', {
-      message: `Template plugin received ${count || 1} result(s).`,
-      type: 'info',
-      duration: 3500
-    })
+    if (event === PluginEvents.APP_READY) await core.names.read(pluginContext)
   },
 
   async onCommand(commandId) {
     if (commandId === 'refresh') return { handled: true, settings: await settings() }
-    if (commandId === 'draw-one') return executeDraw(pluginContext, { count: 1 })
-    if (commandId === 'show-statistics') return queryResource(pluginContext, 'statistics')
-    if (commandId === 'describe-host') return describeHost(pluginContext)
+    if (commandId === 'show-statistics') return core.statistics.read(pluginContext)
     return { handled: false }
   },
 

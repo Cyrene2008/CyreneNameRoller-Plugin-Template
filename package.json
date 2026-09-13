@@ -1,14 +1,15 @@
 {
   "name": "cyrene-name-roller-plugin-template",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "validate": "cnrp validate .",
-    "build": "cnrp pack . --out dist/cyrene-plugin-template.cnrp"
+    "test": "node --test test/*.test.mjs",
+    "validate": "node ./bin/cnrp.mjs validate .",
+    "build": "node ./bin/cnrp.mjs pack . --out dist/cyrene-plugin-template.cnrp"
   },
   "devDependencies": {
-    "@starcyrene/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz"
+    "@starcyrene/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.5.0.tgz"
   },
   "packageManager": "bun@1.3.14",
   "engines": {

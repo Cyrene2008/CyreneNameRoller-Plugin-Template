@@ -1,22 +1,21 @@
 {
   "api": "1.5",
   "schemaVersion": 1,
-  "id": "cn.example.cyrene.plugin",
-  "name": "Cyrene Plugin Template",
-  "version": "1.5.0",
+  "id": "cn.example.api15.plugin",
+  "name": "Cyrene API 1.5 Plugin",
+  "version": "1.0.0",
   "author": "Your Name",
-  "description": "A CyreneNameRoller Plugin API 1.5 template.",
+  "description": "A CyreneNameRoller API 1.5 plugin template.",
   "entry": { "runtime": "cnrp-runner", "script": "src/worker.js", "args": [] },
   "platforms": ["web", "tauri"],
   "permissions": [
     { "id": "page:read", "required": true, "platforms": ["web", "tauri"] },
-    { "id": "core:names:read", "required": false, "platforms": ["web", "tauri"] },
-    { "id": "core:statistics:read", "required": false, "platforms": ["web", "tauri"] }
+    { "id": "dom:main", "required": false, "platforms": ["web", "tauri"] }
   ],
   "files": { "app": { "scopes": ["read"] }, "external": [] },
   "network": { "internet": false },
   "windows": { "create": false, "main": { "control": false }, "floating": { "control": false, "alwaysOnTop": false } },
-  "pages": [{ "id": "draw-studio", "title": "Draw Studio", "location": "main", "entry": "pages/draw-studio.html", "children": [] }],
+  "pages": [{ "id": "main", "title": "Plugin", "location": "main", "entry": "pages/main.html", "children": [] }],
   "hooks": [],
   "signature": null
 }
