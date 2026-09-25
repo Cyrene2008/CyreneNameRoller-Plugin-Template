@@ -1,7 +1,6 @@
 # CyreneNameRoller Plugin Template
 
-This repository targets Plugin API 1.5.0. API 1.4 manifests and helpers are
-migration-only and cannot be published by the bundled `cnrp` CLI.
+This repository builds a **Plugin API 1.4** plugin through the split declaration `manifest.yml` + `contributions.json`, and ships the API 1.5 material (see the appendix) as migration-only reference that the enabled build never uses.
 
 CyreneNameRoller Plugin API 1.4 官方模板。点击 GitHub 的 **Use this template** 创建仓库，即可开发同时适配 Web 与 Tauri 的 `.cnrp` 插件。
 
@@ -17,10 +16,21 @@ CyreneNameRoller Plugin API 1.4 官方模板。点击 GitHub 的 **Use this temp
 - 插件 Worker、命令、动画包和隔离的 Canvas/WebGL 视觉层。
 - GitHub Actions 自动校验、打包 Release 和部署开发文档。
 
+## 声明文件
+
+| 文件 | 内容 |
+| --- | --- |
+| `manifest.yml` | 身份、入口、图标与 `permissions`；绝不包含 `contributes` / `settings` / `pages` / `api` |
+| `contributions.json` | 扁平贡献对象：`settings`、`pages`、`commands`、动画包、视觉层、样式包、原生视图、结果呈现 |
+
+两者不能与 `manifest.json` 同时存在：`cnrp` 发现 `manifest.yml` 时会拒绝同目录的 `manifest.json`。`integrity` 由 `cnrp pack` 注入 `manifest.yml`，覆盖除 `manifest.yml` 外的全部包内文件（含 `contributions.json`），请勿手写。
+
+宿主原生设置写在 `contributions.json` 顶层的 `settings` 区块（`sections[].fields[]`），**不再**使用 `pages[].native`；`pages[]` 只承载 iframe 页面。
+
 ## 使用模板
 
 1. 使用本仓库创建新仓库。
-2. 修改 `manifest.json` 中的反向域名 ID、名称、开发者和版本。
+2. 修改 `manifest.yml` 中的反向域名 ID、名称、开发者和版本；贡献内容改在 `contributions.json`。
 3. 删除不需要的贡献项与权限，只保留实际使用的能力。
 4. 安装 SDK、校验并打包：
 
@@ -30,25 +40,27 @@ bun run validate
 bun run build
 ```
 
+`validate` / `build` 使用 `vendor/` 中随附的 `@starcyrene/cyrene-name-roller@1.4.0` SDK CLI，它与宿主使用同一套声明读取与校验逻辑。
+
 生成的插件位于 `dist/cyrene-plugin-template.cnrp`，可在 CyreneNameRoller 的插件页面导入。
 
-## API 1.5 示例地图
+## 示例地图
 
 | 目标 | 示例文件 | 关键能力 |
 | --- | --- | --- |
-| 宿主原生配置 | `manifest.json` | `native.settings`、动画与 API 1.4 UI 贡献选择器 |
+| 宿主原生配置 | `contributions.json` | `native.settings`、动画与 API 1.4 UI 贡献选择器 |
 | Dock 大型页面 | `pages/draw-studio.*` | `location: "dock"`、`window.CyrenePlugin.request()` |
 | 权威抽签事务 | `pages/draw-studio.js` | `draw.execute`，宿主生成并提交结果 |
-| 稳定组件样式 | `manifest.json` | 3 个 `componentStylePacks`、11 个目标、宿主字体别名 |
-| 可选组件覆盖 | `manifest.json` | `collapse`、`compact`、`reserve` 三种布局语义 |
+| 稳定组件样式 | `contributions.json` | 3 个 `componentStylePacks`、11 个目标、宿主字体别名 |
+| 可选组件覆盖 | `contributions.json` | `collapse`、`compact`、`reserve` 三种布局语义 |
 | 点名侧栏 | `views/roller-stats.json` | 统计绑定、进度条、宿主权威点名命令 |
 | 结果下方 | `views/below-result.json` | 宿主主题绑定、能力发现命令 |
 | 记录工具栏 | `views/records-toolbar.json` | 语义图标、只读统计命令 |
-| 权威结果呈现 | `manifest.json` | `single`、`list`、`grid`、`spotlight` |
+| 权威结果呈现 | `contributions.json` | `single`、`list`、`grid`、`spotlight` |
 | 事件与后台逻辑 | `src/worker.js` | 生命周期、存储、资源查询、能力发现和权威事务 |
 | 动画与视觉层 | `animations/`、`src/visual.js` | 受限动画、OffscreenCanvas |
 
-HTML 页面运行在受控 iframe 中，不能访问宿主 DOM。API 1.4 页面仍使用稳定的 `window.CyrenePlugin.request(method, args)`；宿主在内部用绑定当前页面 Principal 的 `MessageChannel` 传输 RPC。API 1.2 页面保留旧的 `window.message + event.source` 兼容路径，无需重新打包。
+HTML 页面运行在受控 iframe 中，不能访问宿主 DOM。API 1.4 页面仍使用稳定的 `window.CyrenePlugin.request(method, args)`；宿主在内部用绑定当前页面 Principal 的 `MessageChannel` 传输 RPC。设置页与 iframe 共用 `settings.storageKey`，iframe 可通过注入的 `window.CyrenePlugin.settingsKey` 与 `window.CyrenePlugin.settings.read/write/patch` 读写同一份配置。
 
 ## 受限 UI 定制
 
@@ -94,6 +106,10 @@ API 1.4 的原生设置页可用 `component-style-select`、`component-override-
 
 ## 发布插件
 
+打包只收录 `scripts/stage-plugin.mjs` 中 `publishFiles` 列出的文件——双声明文件与宿主引用的载荷（Worker、视觉层、Dock 页面及其 CSS/JS、动画包、原生视图、图标与 README）。`bin/`、`docs/`、`test/`、`scripts/`、CI 工作流、`bun.lock`、`vendor/`、`templates/` 与保留的 `manifest.api15.json` 都不会进入 `.cnrp`。
+
+新增页面或资源时记得同步该清单：漏登记会被拦住——清单引用的文件缺失由 `cnrp validate` 报错，页面 HTML 里引用的同级资源则由 staging 的引用检查报错（否则会是宿主侧静默丢失样式）。
+
 推送 `v1.2.3` 格式的 tag，Release 工作流会用 Bun 校验、生成 `.cnrp` 并上传。插件目录只需登记仓库和资源匹配规则：
 
 ```json
@@ -108,3 +124,14 @@ API 1.4 的原生设置页可用 `component-style-select`、`component-override-
 ```
 
 宿主会通过 GitHub API 获取最新正式版、下载地址和 Release asset SHA-256。完整参考见 [GitHub Pages：API 1.4、Fluent 组件画廊与安全边界](http://cnrp-template.cyrene.hk)。
+
+## 附录：保留的 API 1.5 材料（未启用 / migration-only）
+
+以下内容保留在仓库中供迁移参考，默认的 `validate` / `build` / `test` 不使用它们：
+
+- `manifest.api15.json`：原 API 1.5 根清单，已让位给 `manifest.yml`，避免被 CLI 误读。
+- `bin/cnrp.mjs`：API 1.5 版 CLI（`API_VERSION = 1.5.0`），仅 `test/plugin-api-1.5.test.mjs` 使用；它拒绝 API 1.4 清单，因此不能用于本模板的发布流程。
+- `src/plugin-sdk.mjs`、`src/plugin-sdk.d.ts`：API 1.5 SDK 拷贝，仅测试与文档使用。
+- `templates/api15/`、`vendor/cyrene-name-roller-plugin-sdk-1.5.0.tgz`、`docs/api-1.5-backend-contract.md`、`docs/plugin-development.md`。
+
+启用路径只认 API 1.4 + `manifest.yml` + `contributions.json`。只有这些 1.5 材料阻塞校验、打包或测试时才需要改动它们。
