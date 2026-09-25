@@ -5,7 +5,7 @@
     "": {
       "name": "cyrene-name-roller-plugin-template",
       "devDependencies": {
-        "@starcyrene/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.5.0.tgz",
+        "@starcyrene/cyrene-name-roller": "file:vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz",
       },
     },
   },
