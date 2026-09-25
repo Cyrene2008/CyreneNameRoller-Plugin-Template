@@ -1,0 +1,37 @@
+# 插件身份声明（新格式）：贡献内容写在同目录 contributions.json。
+# 两者不能与 manifest.json 同时存在；打包后 cnrp 会向本文件注入 integrity，
+# 该清单覆盖除 manifest.yml 外的所有包内文件（含 contributions.json）。
+# 仓库根目录的 manifest.api15.json 是保留的 API 1.5 材料，未被本文件启用。
+
+schemaVersion: 1
+id: cn.example.cyrene.plugin
+name: Cyrene Plugin Template
+version: 1.5.0
+author: Your Name
+description: CyreneNameRoller Plugin API 1.4 官方模板：宿主原生设置、权威抽取事务、受限 UI 定制与隔离视觉层。
+
+engine:
+  min: 1.4.0
+  max: 1.4.0
+
+entry: src/worker.js
+icon: assets/icon.svg
+readme: README.md
+
+permissions:
+  - audio:play
+  - audio:select
+  - draw:execute
+  - events:draw
+  - events:lifecycle
+  - names:read
+  - notifications:show
+  - statistics:read
+  - storage:read
+  - storage:write
+  - ui:animations
+  - ui:component-overrides
+  - ui:component-styles
+  - ui:native-views
+  - ui:result-presentations
+  - ui:visual-surfaces
