@@ -1,5 +1,7 @@
 # Plugin API 1.5 Backend Contract
 
+> **未启用 / migration-only**：本页记录 API 1.5 契约。当前仓库的启用路径是 API 1.4 + `manifest.yml` + `contributions.json`（见仓库 README）。API 1.5 材料仅供迁移参考，默认的 validate / build / test 不使用它们。
+
 This document describes the host contract behind the public API 1.5 SDK. It
 is an implementation reference for the CyreneNameRoller host and SDK authors.
 Plugin code must use the SDK groups rather than calling native commands or
