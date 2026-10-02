@@ -13,7 +13,7 @@ async function loadVendoredCli() {
   try {
     await fs.access(vendoredCli)
   } catch {
-    throw new Error(`The vendored API 1.4 SDK is not installed. Run "bun install" before "npm test" (missing ${vendoredCli}).`)
+    throw new Error(`The vendored API 1.4 SDK is not installed. Run "bun install" before "bun run test" (missing ${vendoredCli}).`)
   }
   return import(pathToFileURL(vendoredCli).href)
 }
@@ -23,7 +23,7 @@ test('the enabled declaration is the split manifest.yml + contributions.json pai
   assert.equal(files.has('manifest.yml'), true, 'manifest.yml is the enabled identity declaration')
   assert.equal(files.has('contributions.json'), true, 'contributions.json holds every contribution')
   assert.equal(files.has('manifest.json'), false, 'a stray root manifest.json would be read by the CLI')
-  assert.equal(files.has('manifest.api15.json'), true, 'API 1.5 material is kept but not enabled')
+  assert.equal(files.has('manifest.api15.json'), false, 'revoked API 1.5 material must not be kept')
 
   const contributions = JSON.parse(await fs.readFile(path.join(root, 'contributions.json'), 'utf8'))
   assert.equal(Array.isArray(contributions), false)
@@ -89,7 +89,7 @@ test('the published package carries only the declaration and its referenced payl
 
   // Development-only material must never reach the published package.
   const shipped = new Set(publishFiles)
-  for (const leaked of ['bin/cnrp.mjs', 'docs/index.html', 'test/plugin-api-1.5.test.mjs', 'scripts/stage-plugin.mjs', 'vendor/cyrene-name-roller-plugin-sdk-1.4.1.tgz', 'bun.lock', 'package.json', 'manifest.api15.json', 'plugins/list.json']) {
+  for (const leaked of ['docs/index.html', 'scripts/stage-plugin.mjs', 'vendor/cyrene-name-roller-plugin-sdk-1.4.1.tgz', 'bun.lock', 'package.json', 'plugins/list.json']) {
     assert.equal(shipped.has(leaked), false, `${leaked} must not ship inside the plugin package`)
   }
 })
