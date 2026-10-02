@@ -1,9 +1,9 @@
-name: Validate and release API 1.5 plugin SDK
+name: Validate and release plugin template
 
 on:
   workflow_dispatch:
   push:
-    tags: ['plugin-sdk-v*']
+    tags: ['v*']
 
 permissions:
   contents: write
@@ -17,11 +17,11 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
-      - run: npm test
-      - run: npm run validate
-      - run: npm run build
+      - run: bun run test
+      - run: bun run validate
+      - run: bun run build
       - name: Publish tagged package
-        if: startsWith(github.ref, 'refs/tags/plugin-sdk-v')
+        if: startsWith(github.ref, 'refs/tags/v')
         run: gh release create "$GITHUB_REF_NAME" dist/*.cnrp --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

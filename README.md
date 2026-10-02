@@ -40,7 +40,7 @@ bun run validate
 bun run build
 ```
 
-`validate` / `build` 使用 `vendor/` 中随附的 `@starcyrene/cyrene-name-roller@1.4.0` SDK CLI，它与宿主使用同一套声明读取与校验逻辑。
+`validate` / `build` 使用 `vendor/` 中随附的 `@starcyrene/cyrene-name-roller@1.4.1` SDK CLI，它与宿主使用同一套声明读取与校验逻辑。
 
 生成的插件位于 `dist/cyrene-plugin-template.cnrp`，可在 CyreneNameRoller 的插件页面导入。
 
@@ -102,7 +102,7 @@ API 1.4 的原生设置页可用 `component-style-select`、`component-override-
 
 ## SDK 版本
 
-模板在 `vendor/` 中携带已验证的 `@starcyrene/cyrene-name-roller@1.5.0` SDK 包，因此克隆后无需 registry Token 即可安装。API 1.5 manifests use `api: "1.5"`, a `cnrp-runner` entry, explicit permissions, file scopes, capabilities, hooks and optional signatures.
+模板在 `vendor/` 中携带与宿主同版本的已验证 `@starcyrene/cyrene-name-roller@1.4.1` SDK 包，因此克隆后无需 registry Token 即可安装。启用的 API 1.4 声明使用 `manifest.yml` + `contributions.json`；API 1.5 材料仅作迁移参考（见附录），默认流程不会使用。
 
 ## 发布插件
 
@@ -132,6 +132,6 @@ API 1.4 的原生设置页可用 `component-style-select`、`component-override-
 - `manifest.api15.json`：原 API 1.5 根清单，已让位给 `manifest.yml`，避免被 CLI 误读。
 - `bin/cnrp.mjs`：API 1.5 版 CLI（`API_VERSION = 1.5.0`），仅 `test/plugin-api-1.5.test.mjs` 使用；它拒绝 API 1.4 清单，因此不能用于本模板的发布流程。
 - `src/plugin-sdk.mjs`、`src/plugin-sdk.d.ts`：API 1.5 SDK 拷贝，仅测试与文档使用。
-- `templates/api15/`、`vendor/cyrene-name-roller-plugin-sdk-1.5.0.tgz`、`docs/api-1.5-backend-contract.md`、`docs/plugin-development.md`。
+- `templates/api15/`、`docs/api-1.5-backend-contract.md`、`docs/plugin-development.md`。
 
 启用路径只认 API 1.4 + `manifest.yml` + `contributions.json`。只有这些 1.5 材料阻塞校验、打包或测试时才需要改动它们。

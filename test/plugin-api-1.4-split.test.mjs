@@ -89,7 +89,7 @@ test('the published package carries only the declaration and its referenced payl
 
   // Development-only material must never reach the published package.
   const shipped = new Set(publishFiles)
-  for (const leaked of ['bin/cnrp.mjs', 'docs/index.html', 'test/plugin-api-1.5.test.mjs', 'scripts/stage-plugin.mjs', 'vendor/cyrene-name-roller-plugin-sdk-1.4.0.tgz', 'bun.lock', 'package.json', 'manifest.api15.json', 'plugins/list.json']) {
+  for (const leaked of ['bin/cnrp.mjs', 'docs/index.html', 'test/plugin-api-1.5.test.mjs', 'scripts/stage-plugin.mjs', 'vendor/cyrene-name-roller-plugin-sdk-1.4.1.tgz', 'bun.lock', 'package.json', 'manifest.api15.json', 'plugins/list.json']) {
     assert.equal(shipped.has(leaked), false, `${leaked} must not ship inside the plugin package`)
   }
 })
