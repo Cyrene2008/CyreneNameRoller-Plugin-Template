@@ -6,8 +6,8 @@ const root = path.resolve(import.meta.dirname, '..')
 /**
  * Exactly what the published plugin package contains: the split declaration plus the payload the
  * host references (worker, visual surface, Dock page and its assets, animation pack, native views).
- * Repository tooling (scripts/, CI workflows, test/, docs/, lockfile, vendor SDK, the retained
- * API 1.5 material) is development-only and must never ship inside the .cnrp.
+ * Repository tooling (scripts/, CI workflows, test/, docs/, lockfile, vendor SDK) is
+ * development-only and must never ship inside the .cnrp.
  */
 const publishFiles = Object.freeze([
   'manifest.yml',

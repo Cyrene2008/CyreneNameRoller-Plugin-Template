@@ -1,6 +1,6 @@
 # CyreneNameRoller Plugin Template
 
-This repository builds a **Plugin API 1.4** plugin through the split declaration `manifest.yml` + `contributions.json`, and ships the API 1.5 material (see the appendix) as migration-only reference that the enabled build never uses.
+This repository builds a **Plugin API 1.4** plugin through the split declaration `manifest.yml` + `contributions.json`.
 
 CyreneNameRoller Plugin API 1.4 官方模板。点击 GitHub 的 **Use this template** 创建仓库，即可开发同时适配 Web 与 Tauri 的 `.cnrp` 插件。
 
@@ -102,11 +102,11 @@ API 1.4 的原生设置页可用 `component-style-select`、`component-override-
 
 ## SDK 版本
 
-模板在 `vendor/` 中携带与宿主同版本的已验证 `@starcyrene/cyrene-name-roller@1.4.1` SDK 包，因此克隆后无需 registry Token 即可安装。启用的 API 1.4 声明使用 `manifest.yml` + `contributions.json`；API 1.5 材料仅作迁移参考（见附录），默认流程不会使用。
+模板在 `vendor/` 中携带与宿主同版本的已验证 `@starcyrene/cyrene-name-roller@1.4.1` SDK 包，因此克隆后无需 registry Token 即可安装；启用的声明使用 `manifest.yml` + `contributions.json`。
 
 ## 发布插件
 
-打包只收录 `scripts/stage-plugin.mjs` 中 `publishFiles` 列出的文件——双声明文件与宿主引用的载荷（Worker、视觉层、Dock 页面及其 CSS/JS、动画包、原生视图、图标与 README）。`bin/`、`docs/`、`test/`、`scripts/`、CI 工作流、`bun.lock`、`vendor/`、`templates/` 与保留的 `manifest.api15.json` 都不会进入 `.cnrp`。
+打包只收录 `scripts/stage-plugin.mjs` 中 `publishFiles` 列出的文件——双声明文件与宿主引用的载荷（Worker、视觉层、Dock 页面及其 CSS/JS、动画包、原生视图、图标与 README）。`docs/`、`test/`、`scripts/`、CI 工作流、`bun.lock` 与 `vendor/` 都不会进入 `.cnrp`。
 
 新增页面或资源时记得同步该清单：漏登记会被拦住——清单引用的文件缺失由 `cnrp validate` 报错，页面 HTML 里引用的同级资源则由 staging 的引用检查报错（否则会是宿主侧静默丢失样式）。
 
@@ -124,14 +124,3 @@ API 1.4 的原生设置页可用 `component-style-select`、`component-override-
 ```
 
 宿主会通过 GitHub API 获取最新正式版、下载地址和 Release asset SHA-256。完整参考见 [GitHub Pages：API 1.4、Fluent 组件画廊与安全边界](http://cnrp-template.cyrene.hk)。
-
-## 附录：保留的 API 1.5 材料（未启用 / migration-only）
-
-以下内容保留在仓库中供迁移参考，默认的 `validate` / `build` / `test` 不使用它们：
-
-- `manifest.api15.json`：原 API 1.5 根清单，已让位给 `manifest.yml`，避免被 CLI 误读。
-- `bin/cnrp.mjs`：API 1.5 版 CLI（`API_VERSION = 1.5.0`），仅 `test/plugin-api-1.5.test.mjs` 使用；它拒绝 API 1.4 清单，因此不能用于本模板的发布流程。
-- `src/plugin-sdk.mjs`、`src/plugin-sdk.d.ts`：API 1.5 SDK 拷贝，仅测试与文档使用。
-- `templates/api15/`、`docs/api-1.5-backend-contract.md`、`docs/plugin-development.md`。
-
-启用路径只认 API 1.4 + `manifest.yml` + `contributions.json`。只有这些 1.5 材料阻塞校验、打包或测试时才需要改动它们。
